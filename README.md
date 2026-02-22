@@ -1,64 +1,80 @@
-## Post4U Backend
 
-A self-hosted open source backend for scheduling and automatically posting content to LinkedIn and X (Twitter).
+# Post4U: Schedule Social Media Posts
 
-### Features
-- Schedule posts for LinkedIn and X (Twitter)
-- Automatic posting at specified times
-- MongoDB database for storing scheduled posts
-- FastAPI REST API
-- OAuth2 user authentication for X (Twitter)
-- Easy to self-host and use
+A self-hosted and cloud-ready open source platform to schedule, compose, and analyze posts for X (Twitter), LinkedIn, and Reddit.
 
-### Tech Stack
-- Python 3.11+
-- FastAPI
-- Beanie (MongoDB ODM)
-- MongoDB
-- Tweepy (Twitter/X API)
-- uv (dependency management)
+## Business Model Recommendation
 
-### Setup
-1. Clone the repository and navigate to the backend folder:
-	```bash
-	git clone https://github.com/ShadowSlayer03/Post4U-Schedule-Social-Media-Posts.git
-	cd backend
-	```
-2. Create and activate a virtual environment:
-	```bash
-	uv venv create
-	uv venv activate
-	```
-3. Install dependencies:
-	```bash
-	uv pip install -r requirements.txt
-	```
-4. Configure your `.env` file with MongoDB and Twitter/X credentials:
-	```env
-	MONGO_URI=mongodb://localhost:27017
-	DATABASE_NAME=post_scheduler
-	TWITTER_CLIENT_ID=your_client_id
-	TWITTER_CLIENT_SECRET=your_client_secret
-	TWITTER_CALLBACK_URL=http://localhost:8000/callback
-	```
-5. Start the backend server:
-	```bash
-	uvicorn app.main:app --reload
-	```
+**Open-Core + Cloud Hosted SaaS**
 
-### Usage
-- Use `/` endpoint for healthcheck
-- Use `/posts/` endpoint to schedule and post tweets
-- API documentation available at `/docs`
-
-### Contributing
-Contributions are welcome! Please open issues or submit pull requests for bug fixes, features, or improvements.
-
-### License
-MIT License
-
-### Maintainers
-- ShadowSlayer03 (Admin)
+| Tier         | Price      | What You Get                                                      |
+|--------------|------------|-------------------------------------------------------------------|
+| Self-Host    | $0         | Full code on GitHub, run it yourself                              |
+| Starter      | $9/month   | 3 accounts, 50 posts/month, basic scheduling                      |
+| Creator      | $19/month  | 10 accounts, unlimited posts, AI suggestions                     |
+| Pro          | $49/month  | Unlimited accounts, analytics, team seats, priority support       |
 
 ---
-For frontend setup and full project details, see the main project README.
+
+## Architecture
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    REFLEX FRONTEND (Python)                  │
+│   Dashboard | Compose | Schedule | Suggestions | Analytics   │
+│              Runs as a compiled React app under the hood      │
+└────────────────────────┬────────────────────────────────────┘
+						 │ HTTP / WebSocket (Reflex State)
+┌────────────────────────▼────────────────────────────────────┐
+│               FastAPI Backend  (uvicorn)                     │
+│                                                              │
+│  /api/auth      → OAuth flows (X, LinkedIn, Reddit)         │
+│  /api/posts     → Create, read, update, delete posts        │
+│  /api/publish   → Immediate publish to platforms            │
+│  /api/schedule  → Queue posts with time/date                │
+│  /api/suggest   → AI content suggestions endpoint           │
+│  /api/analytics → Engagement data per post                  │
+└───┬──────────────────────────────────┬───────────────────────┘
+	│                                  │
+┌───▼───────┐                ┌─────────▼──────────────────────┐
+│PostgreSQL │                │    Celery Workers + Redis       │
+│           │                │                                 │
+│ users     │                │  publish_task(post_id)          │
+│ posts     │                │  scheduled_beat (every 1 min)   │
+│ schedules │                │  fetch_trends_task (daily)      │
+│ analytics │                │  ai_suggest_task                │
+└───────────┘                └─────────┬──────────────────────┘
+									   │
+			  ┌────────────────────────┼───────────────────┐
+			  │                        │                   │
+	┌─────────▼──────┐    ┌────────────▼──────┐  ┌────────▼──────┐
+	│ Tweepy (X v2)  │    │  LinkedIn REST API │  │  PRAW (Reddit)│
+	│  post tweet    │    │  post ugcPost      │  │  fetch trends │
+	│  get metrics   │    │  get impressions   │  │  top comments │
+	└────────────────┘    └───────────────────┘  └───────────────┘
+									   │
+							 ┌─────────▼──────────┐
+							 │    Claude / OpenAI  │
+							 │  - Suggest posts    │
+							 │  - Rewrite tone     │
+							 │  - Generate threads │
+							 └────────────────────┘
+```
+
+---
+
+## Key Features
+- Schedule and publish posts to X (Twitter), LinkedIn, and Reddit
+- AI-powered content suggestions and rewriting
+- Analytics dashboard for engagement tracking
+- Multi-account and team support (cloud tiers)
+- Self-hosted and SaaS options
+
+## Quick Start
+See `backend/README.md` and `frontend/README.md` for setup instructions.
+
+## License
+MIT License
+
+## Maintainers
+- ShadowSlayer03 (admin)
