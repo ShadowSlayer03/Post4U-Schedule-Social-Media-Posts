@@ -1,0 +1,9 @@
+{
+  "version": "1",
+  "name": "Post4U",
+  "type": "collection",
+  "ignore": [
+    "node_modules",
+    ".git"
+  ]
+}

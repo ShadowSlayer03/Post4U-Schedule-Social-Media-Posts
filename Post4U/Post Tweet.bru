@@ -1,0 +1,23 @@
+meta {
+  name: Post Tweet
+  type: http
+  seq: 2
+}
+
+post {
+  url: http://localhost:8000/posts/
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "content": "We spend 80% of our time reading code and 20% writing it. Yet we optimize for how fast we write, not how readable it is.\n\n So I'm building something about it, an AI that reviews your PRs before your teammates have to suffer through them.",
+    "platform": "X"
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
