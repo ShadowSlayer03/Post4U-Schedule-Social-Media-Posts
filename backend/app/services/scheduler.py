@@ -1,20 +1,30 @@
-import asyncio
 from datetime import datetime, timezone
-from app.services.x_client import get_api_client
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
+from app.services.publisher import publish_to_platform
 
-def post_tweet(content: str):
-    client = get_api_client()
-    try:
-        response = client.create_tweet(text=content)
-        print(f"Tweet ID: {response.data['id']}")
-        return { "status": "success", "tweet_id": response.data['id'] }
-    except Exception as e:
-        print(f"Error: {e}")
-        return { "status": "error", "message": str(e) }
+scheduler = AsyncIOScheduler()
 
-async def schedule_tweet(content: str, scheduled_time: datetime):
-    now = datetime.now(timezone.utc)
-    delay = (scheduled_time - now).total_seconds()
-    if delay > 0:
-        await asyncio.sleep(delay)
-    post_tweet(content)
+def publish_post(post_id: str, content: str, platforms: list):
+    from app.models.post import Post
+    import asyncio
+
+    results = {}
+    for platform in platforms:
+        results[platform] = publish_to_platform(platform, content)
+
+    async def update_status():
+        post = await Post.get(post_id)
+        if post:
+            post.status = results
+            await post.save()
+
+    asyncio.create_task(update_status())
+
+def schedule_post(post_id: str, content: str, platforms: list, scheduled_time: datetime):
+    scheduler.add_job(
+        publish_post,
+        "date",
+        run_date=scheduled_time,
+        args=[post_id, content, platforms],
+        id=post_id
+    )
