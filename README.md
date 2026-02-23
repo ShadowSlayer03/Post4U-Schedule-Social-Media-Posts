@@ -1,80 +1,323 @@
+# 🚀 Social Autopilot
 
-# Post4U: Schedule Social Media Posts
+> **Cross-post, schedule, and automate your presence on X, Reddit, Telegram, and Discord — from one place. Self-hosted. Open source. No BS.**
 
-A self-hosted and cloud-ready open source platform to schedule, compose, and analyze posts for X (Twitter), LinkedIn, and Reddit.
-
-## Business Model Recommendation
-
-**Open-Core + Cloud Hosted SaaS**
-
-| Tier         | Price      | What You Get                                                      |
-|--------------|------------|-------------------------------------------------------------------|
-| Self-Host    | $0         | Full code on GitHub, run it yourself                              |
-| Starter      | $9/month   | 3 accounts, 50 posts/month, basic scheduling                      |
-| Creator      | $19/month  | 10 accounts, unlimited posts, AI suggestions                     |
-| Pro          | $49/month  | Unlimited accounts, analytics, team seats, priority support       |
+![Python](https://img.shields.io/badge/Python-3.11+-3776AB?style=flat-square&logo=python&logoColor=white)
+![FastAPI](https://img.shields.io/badge/FastAPI-0.110+-009688?style=flat-square&logo=fastapi&logoColor=white)
+![MongoDB](https://img.shields.io/badge/MongoDB-Motor%20%2B%20Beanie-47A248?style=flat-square&logo=mongodb&logoColor=white)
+![License](https://img.shields.io/badge/License-MIT-yellow?style=flat-square)
+![Self Hostable](https://img.shields.io/badge/Self--Hostable-Yes-brightgreen?style=flat-square)
 
 ---
 
-## Architecture
+## What is this?
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│                    REFLEX FRONTEND (Python)                  │
-│   Dashboard | Compose | Schedule | Suggestions | Analytics   │
-│              Runs as a compiled React app under the hood      │
-└────────────────────────┬────────────────────────────────────┘
-						 │ HTTP / WebSocket (Reflex State)
-┌────────────────────────▼────────────────────────────────────┐
-│               FastAPI Backend  (uvicorn)                     │
-│                                                              │
-│  /api/auth      → OAuth flows (X, LinkedIn, Reddit)         │
-│  /api/posts     → Create, read, update, delete posts        │
-│  /api/publish   → Immediate publish to platforms            │
-│  /api/schedule  → Queue posts with time/date                │
-│  /api/suggest   → AI content suggestions endpoint           │
-│  /api/analytics → Engagement data per post                  │
-└───┬──────────────────────────────────┬───────────────────────┘
-	│                                  │
-┌───▼───────┐                ┌─────────▼──────────────────────┐
-│PostgreSQL │                │    Celery Workers + Redis       │
-│           │                │                                 │
-│ users     │                │  publish_task(post_id)          │
-│ posts     │                │  scheduled_beat (every 1 min)   │
-│ schedules │                │  fetch_trends_task (daily)      │
-│ analytics │                │  ai_suggest_task                │
-└───────────┘                └─────────┬──────────────────────┘
-									   │
-			  ┌────────────────────────┼───────────────────┐
-			  │                        │                   │
-	┌─────────▼──────┐    ┌────────────▼──────┐  ┌────────▼──────┐
-	│ Tweepy (X v2)  │    │  LinkedIn REST API │  │  PRAW (Reddit)│
-	│  post tweet    │    │  post ugcPost      │  │  fetch trends │
-	│  get metrics   │    │  get impressions   │  │  top comments │
-	└────────────────┘    └───────────────────┘  └───────────────┘
-									   │
-							 ┌─────────▼──────────┐
-							 │    Claude / OpenAI  │
-							 │  - Suggest posts    │
-							 │  - Rewrite tone     │
-							 │  - Generate threads │
-							 └────────────────────┘
-```
+Social Autopilot is a **self-hosted social media scheduler** built with Python. Write a post once, publish it to multiple platforms instantly or at a scheduled time. No subscriptions, no data harvesting, no lock-in. Your keys, your server, your data.
+
+**Supported platforms:**
+- 🐦 **X (Twitter)** via Tweepy
+- 🟠 **Reddit** via PRAW
+- ✈️ **Telegram** via python-telegram-bot
+- 🎮 **Discord** via Webhooks
 
 ---
 
-## Key Features
-- Schedule and publish posts to X (Twitter), LinkedIn, and Reddit
-- AI-powered content suggestions and rewriting
-- Analytics dashboard for engagement tracking
-- Multi-account and team support (cloud tiers)
-- Self-hosted and SaaS options
+## Features
+
+- ✅ Post immediately or schedule for a future time
+- ✅ Cross-post to multiple platforms in one request
+- ✅ Per-platform success/failure tracking
+- ✅ MongoDB-backed post history
+- ✅ Simple REST API — connect any frontend or call it from scripts
+- ✅ APScheduler (no Redis, no Celery — just runs)
+- ✅ Docker Compose setup — one command and you're live
+- 🔜 Reflex web dashboard (in progress)
+- 🔜 AI-powered post suggestions from Reddit/X trends
+
+---
 
 ## Quick Start
-See `backend/README.md` and `frontend/README.md` for setup instructions.
+
+### Prerequisites
+
+- [Docker](https://docs.docker.com/get-docker/) + [Docker Compose](https://docs.docker.com/compose/)
+- API keys for the platforms you want to use (see [Platform Setup](#platform-setup))
+
+### 1. Clone the repo
+
+```bash
+git clone https://github.com/your-username/social-autopilot.git
+cd social-autopilot
+```
+
+### 2. Set up your environment
+
+```bash
+cp .env.example .env
+```
+
+Open `.env` and fill in the keys for the platforms you want. You can leave the others blank — the app will simply skip platforms with missing credentials.
+
+### 3. Run it
+
+```bash
+docker-compose up -d
+```
+
+That's it. The API is now running at `http://localhost:8000`.
+
+---
+
+## Without Docker (Local Dev)
+
+Requires [uv](https://github.com/astral-sh/uv) and a running MongoDB instance.
+
+```bash
+# Install dependencies
+uv sync
+
+# Run the API
+uv run uvicorn app.main:app --reload --port 8000
+```
+
+---
+
+## Usage
+
+### Post immediately to multiple platforms
+
+```bash
+curl -X POST http://localhost:8000/posts/ \
+  -H "Content-Type: application/json" \
+  -d '{
+    "content": "Hello world from Social Autopilot!",
+    "platforms": ["x", "reddit", "telegram", "discord"]
+  }'
+```
+
+### Schedule a post
+
+```bash
+curl -X POST http://localhost:8000/posts/ \
+  -H "Content-Type: application/json" \
+  -d '{
+    "content": "This drops at 9am sharp.",
+    "platforms": ["x", "telegram"],
+    "scheduled_time": "2025-03-01T09:00:00Z"
+  }'
+```
+
+### View all posts
+
+```bash
+curl http://localhost:8000/posts/
+```
+
+### API Docs
+
+FastAPI's interactive docs are available at:
+```
+http://localhost:8000/docs
+```
+
+---
+
+## Platform Setup
+
+### X (Twitter)
+
+1. Go to [developer.twitter.com](https://developer.twitter.com) and create a project + app
+2. Under **User Authentication Settings**, enable OAuth 1.0a with Read & Write permissions
+3. Generate your Access Token and Secret
+4. Add to `.env`:
+
+```env
+TWITTER_API_KEY=...
+TWITTER_API_SECRET=...
+TWITTER_API_ACCESS_TOKEN=...
+TWITTER_API_ACCESS_TOKEN_SECRET=...
+```
+
+---
+
+### Reddit
+
+1. Go to [reddit.com/prefs/apps](https://www.reddit.com/prefs/apps)
+2. Click **Create App** → choose **script**
+3. Add to `.env`:
+
+```env
+REDDIT_CLIENT_ID=...
+REDDIT_CLIENT_SECRET=...
+REDDIT_USERNAME=your_reddit_username
+REDDIT_PASSWORD=your_reddit_password
+REDDIT_SUBREDDIT=test        # subreddit to post to (without r/)
+```
+
+> **Note:** Reddit requires your account to have some karma before posting to most subreddits. Use `r/test` for testing.
+
+---
+
+### Telegram
+
+1. Message [@BotFather](https://t.me/BotFather) on Telegram → `/newbot`
+2. Copy the bot token
+3. Add the bot as an **admin** to your channel
+4. Your channel ID is `@yourchannel` or a numeric ID like `-1001234567890`
+5. Add to `.env`:
+
+```env
+TELEGRAM_BOT_TOKEN=...
+TELEGRAM_CHANNEL_ID=@yourchannel
+```
+
+---
+
+### Discord
+
+1. Go to your Discord server → **Server Settings → Integrations → Webhooks**
+2. Click **New Webhook**, choose the channel, copy the URL
+3. Add to `.env`:
+
+```env
+DISCORD_WEBHOOK_URL=https://discord.com/api/webhooks/...
+```
+
+No OAuth, no bot, no approval needed.
+
+---
+
+## Environment Variables Reference
+
+```env
+# MongoDB
+MONGO_URI=mongodb://mongo:27017
+DATABASE_NAME=post_scheduler
+
+# X / Twitter
+TWITTER_API_KEY=
+TWITTER_API_SECRET=
+TWITTER_API_ACCESS_TOKEN=
+TWITTER_API_ACCESS_TOKEN_SECRET=
+
+# Reddit
+REDDIT_CLIENT_ID=
+REDDIT_CLIENT_SECRET=
+REDDIT_USERNAME=
+REDDIT_PASSWORD=
+REDDIT_SUBREDDIT=
+
+# Telegram
+TELEGRAM_BOT_TOKEN=
+TELEGRAM_CHANNEL_ID=
+
+# Discord
+DISCORD_WEBHOOK_URL=
+```
+
+Leave any value blank to disable that platform. The app won't crash, it'll just skip it.
+
+---
+
+## Project Structure
+
+```
+social-autopilot/
+├── backend/
+│   ├── app/
+│   │   ├── main.py               # FastAPI app + lifespan
+│   │   ├── config.py             # Settings via pydantic-settings
+│   │   ├── api/
+│   │   │   └── routes.py         # API endpoints
+│   │   ├── models/
+│   │   │   └── post.py           # Beanie document model
+│   │   └── services/
+│   │       ├── publisher.py      # Dispatches to all platforms
+│   │       ├── scheduler.py      # APScheduler setup
+│   │       ├── x_client.py       # Tweepy wrapper
+│   │       ├── reddit_client.py  # PRAW wrapper
+│   │       ├── telegram_client.py
+│   │       └── discord_client.py
+│   ├── pyproject.toml
+│   └── Dockerfile
+├── frontend/                     # Reflex dashboard (coming soon)
+├── docker-compose.yml
+├── .env.example
+└── README.md
+```
+
+---
+
+## Docker Compose
+
+```yaml
+# docker-compose.yml
+services:
+  api:
+    build: ./backend
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    depends_on:
+      - mongo
+    restart: unless-stopped
+
+  mongo:
+    image: mongo:7
+    volumes:
+      - mongo_data:/data/db
+    restart: unless-stopped
+
+volumes:
+  mongo_data:
+```
+
+```dockerfile
+# backend/Dockerfile
+FROM python:3.11-slim
+
+WORKDIR /app
+
+COPY pyproject.toml .
+RUN pip install uv && uv sync --no-dev
+
+COPY app/ app/
+
+CMD ["uv", "run", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+```
+
+---
+
+## Roadmap
+
+- [ ] Reflex web dashboard (compose, schedule, history)
+- [ ] AI post suggestions using Reddit + X trends
+- [ ] Image/media attachment support
+- [ ] Thread/multi-part post support for X
+- [ ] Post analytics (pull engagement metrics back in)
+- [ ] Webhook support (trigger posts from external tools)
+
+---
+
+## Contributing
+
+PRs welcome. For big changes, open an issue first so we can discuss.
+
+```bash
+git clone https://github.com/ShadowSlayer03/Post4U-Schedule-Social-Media-Posts.git ./post4u
+cd post4u
+cp .env.example .env
+uv sync
+uv run uvicorn app.main:app --reload
+```
+
+---
 
 ## License
-MIT License
 
-## Maintainers
-- ShadowSlayer03 (admin)
+MIT — do whatever you want with it.
+
+---
+
+<p align="center">Built with FastAPI · MongoDB · Tweepy · PRAW · APScheduler<br>No VC funding. No tracking. Just vibes.</p>
