@@ -1,4 +1,6 @@
 # app/main.py
+import logging
+
 from fastapi import FastAPI
 from motor.motor_asyncio import AsyncIOMotorClient
 from beanie import init_beanie
@@ -6,6 +8,8 @@ from app.models.post import Post
 from app.api.routes import router
 from app.config import settings
 from app.services.scheduler import init_scheduler
+
+logger = logging.getLogger("uvicorn.error")
 
 app = FastAPI()
 
