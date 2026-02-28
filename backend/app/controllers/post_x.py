@@ -1,5 +1,5 @@
 
-from backend.app.services.x_client import get_X_client
+from app.services.x_client import get_X_client
 
 def post_tweet(content: str):
     client = get_X_client()
