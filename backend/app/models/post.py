@@ -4,9 +4,9 @@ from datetime import datetime, timezone
 
 class Post(Document):
     content: str
-    platforms: List[str]  # ["x", "reddit", "telegram", "discord"]
-    scheduled_time: Optional[datetime] = None
-    status: dict = {}  # per-platform result tracking
+    platforms: List[str]
+    scheduled_time: Optional[datetime] = None  # Always send in UTC from frontend/testing platform
+    status: dict = {}  # Tracks each platform scheduled post result
 
     class Settings:
         name = "posts"
