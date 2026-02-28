@@ -6,72 +6,77 @@ A self-hosted open source backend for scheduling and automatically posting conte
 - Schedule posts for X (Twitter), Reddit, Telegram, and Discord
 - Cross-post to multiple platforms in one request
 - Automatic posting at specified times (scheduling)
-- Per-platform success/failure tracking
-- MongoDB database for storing scheduled posts
+- **Persistent scheduling — scheduled jobs survive server restarts via MongoDB job store**
+- **Per-platform retry logic with exponential back-off (up to 3 attempts)**
+- **Only failed platforms are retried — successful platforms are never re-posted**
+- Per-platform success/failure tracking in MongoDB
+- MongoDB database for storing scheduled posts and scheduler jobs
 - FastAPI REST API
-- OAuth2 user authentication for X (Twitter)
 - Easy to self-host and use
 
 ### Tech Stack
 - Python 3.11+
 - FastAPI
-- Beanie (MongoDB ODM)
+- Beanie (MongoDB ODM) — async MongoDB models
+- Motor — async MongoDB driver (app data)
+- PyMongo — sync MongoDB driver (APScheduler job store)
 - MongoDB
 - Tweepy (Twitter/X API)
 - PRAW (Reddit API)
-- requests (Telegram/Discord)
-- APScheduler (scheduling)
+- requests (Telegram/Discord webhooks)
+- APScheduler 3.x with MongoDBJobStore (persistent scheduling)
 - uv (dependency management)
 
 ### Setup
 1. Clone the repository and navigate to the backend folder:
-	```bash
-	git clone https://github.com/ShadowSlayer03/Post4U-Schedule-Social-Media-Posts.git
-	cd backend
-	```
+    ```bash
+    git clone https://github.com/ShadowSlayer03/Post4U-Schedule-Social-Media-Posts.git
+    cd backend
+    ```
 2. Create and activate a virtual environment:
-	```bash
-	uv venv create
-	uv venv activate
-	```
+    ```bash
+    uv venv
+    .venv\Scripts\activate
+    ```
 3. Install dependencies:
-	```bash
-	uv pip install -r requirements.txt
-	```
+    ```bash
+    uv pip install -r requirements.txt
+    ```
 4. Configure your `.env` file with MongoDB and platform credentials:
-	```env
-	# MongoDB
-	MONGO_URI=mongodb://localhost:27017
-	DATABASE_NAME=post_scheduler
+    ```env
+    # MongoDB
+    MONGO_URI=mongodb://localhost:27017
+    DATABASE_NAME=post_scheduler
 
-	# X / Twitter
-	TWITTER_API_KEY=your_api_key
-	TWITTER_API_SECRET=your_api_secret
-	TWITTER_API_ACCESS_TOKEN=your_access_token
-	TWITTER_API_ACCESS_TOKEN_SECRET=your_access_token_secret
+    # X / Twitter
+    TWITTER_API_KEY=your_api_key
+    TWITTER_API_SECRET=your_api_secret
+    TWITTER_API_ACCESS_TOKEN=your_access_token
+    TWITTER_API_ACCESS_TOKEN_SECRET=your_access_token_secret
 
-	# Reddit
-	REDDIT_CLIENT_ID=your_reddit_client_id
-	REDDIT_CLIENT_SECRET=your_reddit_client_secret
-	REDDIT_USERNAME=your_reddit_username
-	REDDIT_PASSWORD=your_reddit_password
-	REDDIT_SUBREDDIT=your_subreddit
+    # Reddit
+    REDDIT_CLIENT_ID=your_reddit_client_id
+    REDDIT_CLIENT_SECRET=your_reddit_client_secret
+    REDDIT_USERNAME=your_reddit_username
+    REDDIT_PASSWORD=your_reddit_password
+    REDDIT_SUBREDDIT=your_subreddit
 
-	# Telegram
-	TELEGRAM_BOT_TOKEN=your_telegram_bot_token
-	TELEGRAM_CHANNEL_ID=@yourchannel
+    # Telegram
+    TELEGRAM_BOT_TOKEN=your_telegram_bot_token
+    TELEGRAM_CHANNEL_ID=@yourchannel
 
-	# Discord
-	DISCORD_WEBHOOK_URL=https://discord.com/api/webhooks/...
-	```
+    # Discord
+    DISCORD_WEBHOOK_URL=https://discord.com/api/webhooks/...
+    ```
 5. Start the backend server:
-	```bash
-	uvicorn app.main:app --reload
-	```
+    ```bash
+    uvicorn app.main:app --reload --log-level debug
+    ```
 
 ### Usage
 - Use `/` endpoint for healthcheck
-- Use `/posts/` endpoint to schedule and cross-post to any combination of platforms
+- Use `/posts/` (POST) to immediately publish or schedule a post to any combination of platforms
+- Use `/posts/` (GET) to retrieve all posts and their per-platform statuses
 - API documentation available at `/docs`
 
 #### Example: Post immediately to multiple platforms
@@ -79,8 +84,8 @@ A self-hosted open source backend for scheduling and automatically posting conte
 curl -X POST http://localhost:8000/posts/ \
   -H "Content-Type: application/json" \
   -d '{
-	"content": "Hello world from Post4U!",
-	"platforms": ["x", "reddit", "telegram", "discord"]
+    "content": "Hello world from Post4U!",
+    "platforms": ["x", "reddit", "telegram", "discord"]
   }'
 ```
 
@@ -89,16 +94,36 @@ curl -X POST http://localhost:8000/posts/ \
 curl -X POST http://localhost:8000/posts/ \
   -H "Content-Type: application/json" \
   -d '{
-	"content": "This drops at 9am sharp.",
-	"platforms": ["x", "telegram"],
-	"scheduled_time": "2025-03-01T09:00:00Z"
+    "content": "This drops at 9am sharp.",
+    "platforms": ["x", "telegram"],
+    "scheduled_time": "2026-03-01T09:00:00Z"
   }'
 ```
+
+> **Note:** `scheduled_time` must be a future UTC datetime in ISO 8601 format (e.g. `2026-03-01T09:00:00Z`). If the time has already passed, the post will be published immediately instead.
+
+> **Note:** Multi-line content must use `\n` for line breaks in JSON, not actual newlines.
 
 #### Example: View all posts
 ```bash
 curl http://localhost:8000/posts/
 ```
+
+### How Scheduling Works
+1. When a post with a future `scheduled_time` is received, it is saved to MongoDB and a job is registered with APScheduler.
+2. APScheduler persists the job to the `scheduled_jobs` MongoDB collection.
+3. At the scheduled time, APScheduler calls `publish_with_retry` which fetches the post from MongoDB and publishes to all specified platforms.
+4. If any platform fails, **only the failed platforms** are retried with a back-off delay:
+   - Attempt 1 fails → retry in 5 minutes
+   - Attempt 2 fails → retry in 10 minutes
+   - Attempt 3 fails → marked as error in MongoDB, no further retries
+5. On server restart, APScheduler automatically reads all pending jobs from MongoDB and resumes scheduling — **no jobs are lost.**
+
+### MongoDB Collections
+| Collection | Purpose |
+|---|---|
+| `posts` | Stores post content, platforms, scheduled time, and per-platform publish results |
+| `scheduled_jobs` | Managed by APScheduler — stores pending job metadata for persistence across restarts |
 
 ### Contributing
 Contributions are welcome! Please open issues or submit pull requests for bug fixes, features, or improvements.

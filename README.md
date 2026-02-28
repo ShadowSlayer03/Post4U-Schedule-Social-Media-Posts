@@ -78,6 +78,9 @@ uv sync
 
 # Run the API
 uv run uvicorn app.main:app --reload --port 8000
+
+# Run with all logs enabled
+uv run uvicorn app.main:app --reload --log-level debug
 ```
 
 ---
@@ -219,10 +222,10 @@ Leave any value blank to disable that platform. The app won't crash, it'll just 
 
 ---
 
-## Project Structure
+## Intended Project Structure
 
 ```
-social-autopilot/
+post4u/
 ├── backend/
 │   ├── app/
 │   │   ├── main.py               # FastAPI app + lifespan
