@@ -1,6 +1,7 @@
-from app.services.scheduler import post_tweet
 from fastapi import APIRouter
 from app.models.post import Post
+from app.services.publisher import publish_to_platform
+from app.services.scheduler import scheduler_service
 from datetime import datetime, timezone
 
 router = APIRouter()
@@ -19,15 +20,14 @@ async def create_post(post: Post):
     await post.insert()
 
     if post.scheduled_time and post.scheduled_time > datetime.now(timezone.utc):
-        schedule_post(str(post.id), post.content, post.platforms, post.scheduled_time)
-        return {"message": "Post scheduled", "post_id": str(post.id)}
+        job_id = await scheduler_service.schedule_post(str(post.id), post.scheduled_time)
+        return {"message": "Post scheduled", "post_id": str(post.id), "job_id": job_id}
 
-    # Post immediately
+    # Immediate publish
     results = {}
     for platform in post.platforms:
-        results[platform] = publish_to_platform(platform, post.content)
+        results[platform] = await publish_to_platform(platform, post.content)
 
     post.status = results
     await post.save()
-
     return {"message": "Post published", "post_id": str(post.id), "results": results}

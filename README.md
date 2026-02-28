@@ -1,4 +1,4 @@
-# 🚀 Social Autopilot
+# 🚀 POST4U - Social Media Autopilot
 
 > **Cross-post, schedule, and automate your presence on X, Reddit, Telegram, and Discord — from one place. Self-hosted. Open source. No BS.**
 

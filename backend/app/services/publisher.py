@@ -1,10 +1,13 @@
+import asyncio
 from app.controllers.post_reddit import post_to_reddit
+from app.controllers.post_discord import post_to_discord
+from app.controllers.post_telegram import post_to_telegram
+from app.controllers.post_x import post_tweet
 from app.config import settings
-from backend.app.controllers.post_discord import post_to_discord
-from backend.app.controllers.post_telegram import post_to_telegram
-from backend.app.controllers.post_x import post_tweet
 
-def publish_to_platform(platform: str, content: str):
+def _publish_sync(platform: str, content: str) -> dict:
+    """Synchronous publish — runs in a thread pool executor."""
+    platform = platform.lower()
     if platform == "x":
         if not settings.TWITTER_API_KEY_MAIN:
             return {"status": "skipped", "message": "X credentials not set"}
@@ -12,7 +15,7 @@ def publish_to_platform(platform: str, content: str):
     elif platform == "reddit":
         if not settings.REDDIT_CLIENT_ID:
             return {"status": "skipped", "message": "Reddit credentials not set"}
-        return post_to_reddit(content, subreddit="test")
+        return post_to_reddit(content, subreddit=settings.REDDIT_SUBREDDIT)
     elif platform == "telegram":
         if not settings.TELEGRAM_BOT_TOKEN:
             return {"status": "skipped", "message": "Telegram credentials not set"}
@@ -23,3 +26,7 @@ def publish_to_platform(platform: str, content: str):
         return post_to_discord(content)
     else:
         return {"status": "error", "message": f"Unsupported platform: {platform}"}
+
+async def publish_to_platform(platform: str, content: str) -> dict:
+    loop = asyncio.get_event_loop()
+    return await loop.run_in_executor(None, _publish_sync, platform, content)
