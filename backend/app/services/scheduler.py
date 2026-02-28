@@ -9,7 +9,7 @@ from apscheduler.executors.asyncio import AsyncIOExecutor
 from app.config import settings
 from datetime import datetime, timezone
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("uvicorn.error")
 
 # -- Module-level scheduler instance, configured in init_scheduler() --
 scheduler: AsyncIOScheduler | None = None
@@ -42,25 +42,26 @@ def init_scheduler() -> AsyncIOScheduler:
 # Job function — must be top-level so APScheduler can re-import it by name
 # ---------------------------------------------------------------------------
 
-async def publish_with_retry(post_id: str, attempt: int = 1) -> None:
+async def publish_with_retry(post_id: str, attempt: int = 1, retry_platforms: list[str] | None = None) -> None:
     """
-    Fetch the post from MongoDB and publish to all its platforms.
-    On failure, reschedule with exponential back-off (up to 3 attempts).
+    Fetch the post from MongoDB and publish to specified platforms.
+    On failure, reschedule ONLY the failed platforms (passed as arg, not re-read from DB).
+    retry_platforms=None means first attempt → use all platforms from the post.
     """
     from app.models.post import Post
     from app.services.publisher import publish_to_platform
-    
-    breathing_time = 2 ** (attempt - 1)
 
     post = await Post.get(post_id)
     if post is None:
         logger.warning("publish_with_retry: post %s not found, skipping.", post_id)
         return
 
+    platforms_to_post = retry_platforms if retry_platforms is not None else post.platforms
+
     results: dict = {}
     failed_platforms: list[str] = []
 
-    for platform in post.platforms:
+    for platform in platforms_to_post:
         try:
             result = await publish_to_platform(platform, post.content)
             results[platform] = result
@@ -71,24 +72,22 @@ async def publish_with_retry(post_id: str, attempt: int = 1) -> None:
             results[platform] = {"status": "error", "message": str(exc)}
             failed_platforms.append(platform)
 
-    # Persist per-platform results
     post.status = {**post.status, **results}
     await post.save()
 
-    # Retry only the failed platforms if under the attempt cap
     if failed_platforms and attempt < 3:
-        delay_minutes = breathing_time * attempt
+        delay_minutes = 3 * attempt
         run_at = datetime.now(timezone.utc) + timedelta(minutes=delay_minutes)
         logger.info(
-            "Retrying post %s (attempt %d) for platforms %s in %d min",
-            post_id, attempt + 1, failed_platforms, delay_minutes,
+            "Retrying post %s (attempt %d→%d) for platforms %s in %d min",
+            post_id, attempt, attempt + 1, failed_platforms, delay_minutes,
         )
         if scheduler:
             scheduler.add_job(
                 publish_with_retry,
                 "date",
                 run_date=run_at,
-                args=[post_id, attempt + 1],
+                args=[post_id, attempt + 1, failed_platforms],
             )
 
 
