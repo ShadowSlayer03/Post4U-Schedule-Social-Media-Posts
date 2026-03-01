@@ -17,7 +17,7 @@ Social Autopilot is a **self-hosted social media scheduler** built with Python. 
 **Supported platforms:**
 - 🐦 **X (Twitter)** via Tweepy
 - 🟠 **Reddit** via PRAW
-- ✈️ **Telegram** via python-telegram-bot
+- ✈️ **Telegram** via Bot API (requests)
 - 🎮 **Discord** via Webhooks
 
 ---
@@ -28,8 +28,11 @@ Social Autopilot is a **self-hosted social media scheduler** built with Python. 
 - ✅ Cross-post to multiple platforms in one request
 - ✅ Per-platform success/failure tracking
 - ✅ MongoDB-backed post history
+- ✅ Persistent scheduling — jobs survive server restarts via MongoDB job store
+- ✅ Per-platform retry logic — only failed platforms are retried (up to 3 attempts)
+- ✅ Platforms with missing credentials are skipped gracefully, not crashed
 - ✅ Simple REST API — connect any frontend or call it from scripts
-- ✅ APScheduler (no Redis, no Celery — just runs)
+- ✅ APScheduler with MongoDBJobStore (no Redis, no Celery — just runs)
 - ✅ Docker Compose setup — one command and you're live
 - 🔜 Reflex web dashboard (in progress)
 - 🔜 AI-powered post suggestions from Reddit/X trends
@@ -61,10 +64,56 @@ Open `.env` and fill in the keys for the platforms you want. You can leave the o
 ### 3. Run it
 
 ```bash
-docker-compose up -d
+docker compose up --build -d
 ```
 
-That's it. The API is now running at `http://localhost:8000`.
+> **Note:** The initial build might take a few minutes as it compiles all dependencies.
+
+That's it. 
+- **Backend API:** `http://localhost:8000`
+- **Interactive API Docs:** `http://localhost:8000/docs`
+- **Frontend Dashboard:** `http://localhost:3000` (Once the frontend service is complete)
+
+---
+
+## Testing Your Setup
+
+### 1. Check API Health
+```bash
+curl http://localhost:8000/
+```
+Expected: `{"message": "Welcome to Post4U..."}`
+
+### 2. Verify MongoDB & Scheduler
+Check the logs to ensure MongoDB connected and the scheduler initialized successfully:
+```bash
+docker compose logs api
+```
+Look for: `INFO: ✅ Scheduler started and MongoDB connected`
+
+### 3. Post a Test Message (Immediate)
+Replace the platforms with ones you have configured in `.env`:
+```bash
+curl -X POST http://localhost:8000/posts/ \
+  -H "Content-Type: application/json" \
+  -d '{
+    "content": "Testing Post4U! 🚀",
+    "platforms": ["discord", "telegram"]
+  }'
+```
+
+### 4. Schedule a Post
+**Important:** Use a UTC time string. If the time has already passed, the API will fall back to an immediate post.
+```bash
+# Example for a time in the future
+curl -X POST http://localhost:8000/posts/ \
+  -H "Content-Type: application/json" \
+  -d '{
+    "content": "This is a scheduled message.",
+    "platforms": ["x"],
+    "scheduled_time": "2026-03-01T15:00:00Z"
+  }'
+```
 
 ---
 
@@ -222,26 +271,29 @@ Leave any value blank to disable that platform. The app won't crash, it'll just 
 
 ---
 
-## Intended Project Structure
+## Project Structure
 
 ```
 post4u/
 ├── backend/
 │   ├── app/
-│   │   ├── main.py               # FastAPI app + lifespan
-│   │   ├── config.py             # Settings via pydantic-settings
+│   │   ├── main.py               # FastAPI app, startup/shutdown
+│   │   ├── config.py             # Settings via pydantic-settings (.env)
 │   │   ├── api/
 │   │   │   └── routes.py         # API endpoints
 │   │   ├── models/
-│   │   │   └── post.py           # Beanie document model
+│   │   │   └── post.py           # Beanie document model + validators
+│   │   ├── controllers/
+│   │   │   ├── post_x.py         # Twitter/X — Tweepy
+│   │   │   ├── post_reddit.py    # Reddit — PRAW
+│   │   │   ├── post_telegram.py  # Telegram — Bot API (requests)
+│   │   │   └── post_discord.py   # Discord — Webhook (requests)
 │   │   └── services/
-│   │       ├── publisher.py      # Dispatches to all platforms
-│   │       ├── scheduler.py      # APScheduler setup
-│   │       ├── x_client.py       # Tweepy wrapper
-│   │       ├── reddit_client.py  # PRAW wrapper
-│   │       ├── telegram_client.py
-│   │       └── discord_client.py
-│   ├── pyproject.toml
+│   │       ├── publisher.py      # Dispatches to controllers (thread pool executor)
+│   │       ├── scheduler.py      # APScheduler + MongoDBJobStore + retry logic
+│   │       ├── x_client.py       # Tweepy client factory
+│   │       └── reddit_client.py  # PRAW client factory
+│   ├── requirements.txt
 │   └── Dockerfile
 ├── frontend/                     # Reflex dashboard (coming soon)
 ├── docker-compose.yml
@@ -253,8 +305,10 @@ post4u/
 
 ## Docker Compose
 
+The `Dockerfile` lives in `backend/`. The `docker-compose.yml` and `.env` live at the project root.
+
 ```yaml
-# docker-compose.yml
+# docker-compose.yml  (project root)
 services:
   api:
     build: ./backend
@@ -282,13 +336,15 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
-COPY pyproject.toml .
-RUN pip install uv && uv sync --no-dev
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
 
 COPY app/ app/
 
-CMD ["uv", "run", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
 ```
+
+> The two services are all you need — `api` + `mongo`. APScheduler uses the same MongoDB instance for its job store. No Redis, no Celery, no extra containers.
 
 ---
 

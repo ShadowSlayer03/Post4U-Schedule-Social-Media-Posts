@@ -42,32 +42,8 @@ A self-hosted open source backend for scheduling and automatically posting conte
     ```bash
     uv pip install -r requirements.txt
     ```
-4. Configure your `.env` file with MongoDB and platform credentials:
-    ```env
-    # MongoDB
-    MONGO_URI=mongodb://localhost:27017
-    DATABASE_NAME=post_scheduler
-
-    # X / Twitter
-    TWITTER_API_KEY=your_api_key
-    TWITTER_API_SECRET=your_api_secret
-    TWITTER_API_ACCESS_TOKEN=your_access_token
-    TWITTER_API_ACCESS_TOKEN_SECRET=your_access_token_secret
-
-    # Reddit
-    REDDIT_CLIENT_ID=your_reddit_client_id
-    REDDIT_CLIENT_SECRET=your_reddit_client_secret
-    REDDIT_USERNAME=your_reddit_username
-    REDDIT_PASSWORD=your_reddit_password
-    REDDIT_SUBREDDIT=your_subreddit
-
-    # Telegram
-    TELEGRAM_BOT_TOKEN=your_telegram_bot_token
-    TELEGRAM_CHANNEL_ID=@yourchannel
-
-    # Discord
-    DISCORD_WEBHOOK_URL=https://discord.com/api/webhooks/...
-    ```
+4. Configure your `.env` file with MongoDB and platform credentials as provided in the .env.example file.
+  
 5. Start the backend server:
     ```bash
     uvicorn app.main:app --reload --log-level debug
