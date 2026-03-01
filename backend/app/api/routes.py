@@ -8,7 +8,7 @@ router = APIRouter()
 
 @router.get("/")
 async def read_root():
-    return {"message": "Welcome to the Post Scheduler API"}
+    return {"message": "Welcome to Post4U - Open Source, Self-Hostable Post Scheduler API"}
 
 @router.get("/posts/")
 async def get_posts():
@@ -23,7 +23,6 @@ async def create_post(post: Post):
         job_id = await scheduler_service.schedule_post(str(post.id), post.scheduled_time)
         return {"message": "Post scheduled", "post_id": str(post.id), "job_id": job_id}
 
-    # Immediate publish
     results = {}
     for platform in post.platforms:
         results[platform] = await publish_to_platform(platform, post.content)
