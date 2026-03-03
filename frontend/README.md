@@ -16,7 +16,7 @@ A self-hosted open source frontend for scheduling and managing posts to LinkedIn
 ### Setup
 1. Clone the repository and navigate to the frontend folder:
 	```bash
-	git clone <repo-url>
+	git clone https://github.com/ShadowSlayer03/Post4U-Schedule-Social-Media-Posts.git
 	cd frontend
 	```
 2. (Recommended) Create and activate a virtual environment:
