@@ -6,16 +6,34 @@ meta {
 
 post {
   url: http://localhost:8000/posts/
-  body: json
+  body: multipartForm
   auth: inherit
 }
 
 body:json {
   {
-    "content": "Building something I've wanted for a while 👇\n\nPost4U — an open-source tool to schedule & auto-post to X, Reddit, Telegram, and Discord from one place.\n\nNo subscriptions. No bloat. Just self-host it and you're good.\n\nBuilt with Python + FastAPI + MongoDB 🐍\n\nGitHub: https://github.com/ShadowSlayer03/Post4U-Schedule-Social-Media-Posts\n\n#OpenSource #BuildInPublic #Python #FastAPI #DevTools #SideProject",
-    "platforms": ["Telegram", "X"],
-    "scheduled_time": "2026-03-01T07:31:00Z"
+    "content": "🚀 Excited to announce that #Post4U now supports image uploads! Testing the new file upload feature for tweets. #BuildInPublic #OpenSource #Python\n\nStar the progress: https://github.com/ShadowSlayer03/Post4U-Schedule-Social-Media-Posts",
+    "platforms": [
+      "X"
+    ],
+    "scheduled_time": "2026-03-03T10:30:00Z",
+    "media":
   }
+}
+
+body:multipart-form {
+  content: '''
+    Testing out the brand-new image upload feature for tweets in #Post4U! 📸
+    
+    I’m also currently diving deep into Reflex to build out a dedicated frontend for the app. Check out what I’m cooking here:
+    
+    🔗 https://github.com/ShadowSlayer03/Post4U-Schedule-Social-Media-Posts
+    
+    #BuildInPublic #OpenSource #Python #Reflex #WebDev
+  '''
+  platforms: X
+  media: @file(D:\Projects_and_Docs\Post4U-Schedule-Social-Media-Posts\frontend\assets\post4u_poster_new.png)
+  scheduled_time: 2026-03-02T09:10:00.000Z
 }
 
 settings {
