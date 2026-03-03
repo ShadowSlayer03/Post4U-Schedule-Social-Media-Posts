@@ -1,0 +1,101 @@
+import reflex as rx
+
+
+def footer() -> rx.Component:
+    return rx.box(
+        rx.vstack(
+            rx.box(
+                height="1px",
+                width="100%",
+                background="linear-gradient(90deg, transparent, rgba(0,255,178,0.3), transparent)",
+                margin_bottom="3em",
+            ),
+            rx.hstack(
+                rx.vstack(
+                    rx.hstack(
+                        rx.box(
+                            width="6px",
+                            height="6px",
+                            background="#00FFB2",
+                            border_radius="50%",
+                            box_shadow="0 0 8px #00FFB2",
+                        ),
+                        rx.text(
+                            "POST4U",
+                            font_family="'DM Mono', monospace",
+                            font_size="0.85rem",
+                            font_weight="700",
+                            letter_spacing="0.18em",
+                            color="white",
+                        ),
+                        spacing="2",
+                        align="center",
+                    ),
+                    rx.text(
+                        "Open source. Self-hosted. No BS.",
+                        font_family="'DM Mono', monospace",
+                        font_size="0.72rem",
+                        color="rgba(255,255,255,0.25)",
+                        letter_spacing="0.04em",
+                    ),
+                    align="start",
+                    spacing="2",
+                ),
+                rx.hstack(
+                    rx.link(
+                        "MIT License",
+                        href="https://github.com",
+                        font_family="'DM Mono', monospace",
+                        font_size="0.72rem",
+                        color="rgba(255,255,255,0.25)",
+                        text_decoration="none",
+                        _hover={"color": "#00FFB2"},
+                        transition="color 0.2s",
+                    ),
+                    rx.text("·", color="rgba(255,255,255,0.15)", font_size="0.72rem"),
+                    rx.link(
+                        "GitHub",
+                        href="https://github.com",
+                        font_family="'DM Mono', monospace",
+                        font_size="0.72rem",
+                        color="rgba(255,255,255,0.25)",
+                        text_decoration="none",
+                        _hover={"color": "#00FFB2"},
+                        transition="color 0.2s",
+                    ),
+                    rx.text("·", color="rgba(255,255,255,0.15)", font_size="0.72rem"),
+                    rx.link(
+                        "Docs",
+                        href="#setup",
+                        font_family="'DM Mono', monospace",
+                        font_size="0.72rem",
+                        color="rgba(255,255,255,0.25)",
+                        text_decoration="none",
+                        _hover={"color": "#00FFB2"},
+                        transition="color 0.2s",
+                    ),
+                    spacing="3",
+                    align="center",
+                ),
+                justify="between",
+                align="center",
+                width="100%",
+            ),
+            rx.text(
+                "Built with FastAPI · MongoDB · Tweepy · PRAW · APScheduler",
+                font_family="'DM Mono', monospace",
+                font_size="0.68rem",
+                color="rgba(255,255,255,0.12)",
+                letter_spacing="0.04em",
+                text_align="center",
+                padding_top="1.5em",
+            ),
+            width="100%",
+            max_width="1200px",
+            margin="0 auto",
+        ),
+        width="100%",
+        padding_x=rx.breakpoints(initial="1.5em", md="2.5em"),
+        padding_y="3em",
+        background="#060608",
+    )
