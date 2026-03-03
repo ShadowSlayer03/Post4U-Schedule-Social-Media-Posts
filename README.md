@@ -1,4 +1,4 @@
-# 🚀 POST4U - Social Media Autopilot
+# POST4U - Social Media Autopilot
 
 > **Cross-post, schedule, and automate your presence on X, Reddit, Telegram, and Discord — from one place. Self-hosted. Open source. No BS.**
 
@@ -15,10 +15,10 @@
 Social Autopilot is a **self-hosted social media scheduler** built with Python. Write a post once, publish it to multiple platforms instantly or at a scheduled time. No subscriptions, no data harvesting, no lock-in. Your keys, your server, your data.
 
 **Supported platforms:**
-- 🐦 **X (Twitter)** via Tweepy
-- 🟠 **Reddit** via PRAW
-- ✈️ **Telegram** via Bot API (requests)
-- 🎮 **Discord** via Webhooks
+- **X (Twitter)** via Tweepy
+- **Reddit** via PRAW
+- **Telegram** via Bot API (requests)
+- **Discord** via Webhooks
 
 ---
 
@@ -49,8 +49,9 @@ Social Autopilot is a **self-hosted social media scheduler** built with Python. 
 ### 1. Clone the repo
 
 ```bash
-git clone https://github.com/your-username/social-autopilot.git
-cd social-autopilot
+git clone https://github.com/ShadowSlayer03/Post4U-Schedule-Social-Media-Posts.git ./post4u
+
+cd post4u
 ```
 
 ### 2. Set up your environment
@@ -271,38 +272,6 @@ Leave any value blank to disable that platform. The app won't crash, it'll just 
 
 ---
 
-## Project Structure
-
-```
-post4u/
-├── backend/
-│   ├── app/
-│   │   ├── main.py               # FastAPI app, startup/shutdown
-│   │   ├── config.py             # Settings via pydantic-settings (.env)
-│   │   ├── api/
-│   │   │   └── routes.py         # API endpoints
-│   │   ├── models/
-│   │   │   └── post.py           # Beanie document model + validators
-│   │   ├── controllers/
-│   │   │   ├── post_x.py         # Twitter/X — Tweepy
-│   │   │   ├── post_reddit.py    # Reddit — PRAW
-│   │   │   ├── post_telegram.py  # Telegram — Bot API (requests)
-│   │   │   └── post_discord.py   # Discord — Webhook (requests)
-│   │   └── services/
-│   │       ├── publisher.py      # Dispatches to controllers (thread pool executor)
-│   │       ├── scheduler.py      # APScheduler + MongoDBJobStore + retry logic
-│   │       ├── x_client.py       # Tweepy client factory
-│   │       └── reddit_client.py  # PRAW client factory
-│   ├── requirements.txt
-│   └── Dockerfile
-├── frontend/                     # Reflex dashboard (coming soon)
-├── docker-compose.yml
-├── .env.example
-└── README.md
-```
-
----
-
 ## Docker Compose
 
 The `Dockerfile` lives in `backend/`. The `docker-compose.yml` and `.env` live at the project root.
@@ -345,17 +314,6 @@ CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
 ```
 
 > The two services are all you need — `api` + `mongo`. APScheduler uses the same MongoDB instance for its job store. No Redis, no Celery, no extra containers.
-
----
-
-## Roadmap
-
-- [ ] Reflex web dashboard (compose, schedule, history)
-- [ ] AI post suggestions using Reddit + X trends
-- [ ] Image/media attachment support
-- [ ] Thread/multi-part post support for X
-- [ ] Post analytics (pull engagement metrics back in)
-- [ ] Webhook support (trigger posts from external tools)
 
 ---
 
