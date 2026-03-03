@@ -8,6 +8,7 @@ class Post(Document):
     platforms: List[str]
     scheduled_time: Optional[datetime] = None
     status: dict = {}
+    media_path: Optional[str] = None
 
     @field_validator("platforms", mode="before")
     @classmethod
