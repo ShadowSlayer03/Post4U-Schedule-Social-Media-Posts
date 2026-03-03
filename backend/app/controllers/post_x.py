@@ -16,7 +16,6 @@ def post_tweet(content: str, media_path: str = None):
         if media_path:
             logger.info(f"Uploading media from path: {media_path}")
             media = api_v1.media_upload(media_path)
-            logger.info("Media upload response:", media)
             media_ids.append(media.media_id)
             logger.info(f"Media uploaded successfully, media_id: {media.media_id}")
             
