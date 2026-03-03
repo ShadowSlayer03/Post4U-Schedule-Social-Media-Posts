@@ -1,8 +1,10 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, UploadFile, File, Form
 from app.models.post import Post
 from app.services.publisher import publish_to_platform
 from app.services.scheduler import scheduler_service
 from datetime import datetime, timezone
+import os
+import shutil
 
 router = APIRouter()
 
@@ -16,7 +18,27 @@ async def get_posts():
     return posts
 
 @router.post("/posts/")
-async def create_post(post: Post):
+async def create_post(
+    content: str = Form(...),
+    platforms: str = Form(...),
+    scheduled_time: str = Form(None),
+    media: UploadFile = File(None)
+):
+    media_path = None
+    if media:
+        static_dir = "app/static"
+        os.makedirs(static_dir, exist_ok=True)
+        media_path = os.path.join(static_dir, media.filename)
+        media_path = media_path.replace("\\", "/")
+        with open(media_path, "wb") as buffer:
+            shutil.copyfileobj(media.file, buffer)
+
+    post = Post(
+        content=content,
+        platforms=[p.strip().lower() for p in platforms.split(",")],
+        scheduled_time=datetime.fromisoformat(scheduled_time) if scheduled_time else None,
+        media_path=media_path
+    )
     await post.insert()
 
     if post.scheduled_time and post.scheduled_time > datetime.now(timezone.utc):
@@ -25,7 +47,7 @@ async def create_post(post: Post):
 
     results = {}
     for platform in post.platforms:
-        results[platform] = await publish_to_platform(platform, post.content)
+        results[platform] = await publish_to_platform(platform, post.content, post.media_path)
 
     post.status = results
     await post.save()
