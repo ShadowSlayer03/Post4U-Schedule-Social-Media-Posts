@@ -1,4 +1,7 @@
+import uuid
+
 from fastapi import APIRouter, UploadFile, File, Form
+from werkzeug.utils import secure_filename
 from app.models.post import Post
 from app.services.publisher import publish_to_platform
 from app.services.scheduler import scheduler_service
@@ -28,8 +31,13 @@ async def create_post(
     if media:
         static_dir = "app/static"
         os.makedirs(static_dir, exist_ok=True)
-        media_path = os.path.join(static_dir, media.filename)
-        media_path = media_path.replace("\\", "/")
+        
+        ext = os.path.splitext(media.filename)[1]
+        
+        unique_name = f"{uuid.uuid4().hex}{ext}"
+        safe_name = secure_filename(unique_name)
+        
+        media_path = os.path.join(static_dir, safe_name)
         with open(media_path, "wb") as buffer:
             shutil.copyfileobj(media.file, buffer)
 
