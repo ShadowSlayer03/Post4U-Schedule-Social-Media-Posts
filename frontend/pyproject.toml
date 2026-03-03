@@ -1,7 +1,7 @@
 [project]
 name = "post4u_frontend"
 version = "0.1.0"
-description = "Add your description here"
+description = "Frontend for Post4U"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
