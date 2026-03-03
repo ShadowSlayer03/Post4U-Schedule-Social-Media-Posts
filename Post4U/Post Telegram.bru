@@ -1,0 +1,24 @@
+meta {
+  name: Post Telegram
+  type: http
+  seq: 4
+}
+
+get {
+  url: http://localhost:8000/posts/
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "content": "🛠 <b>Post4U Dev Log — March 3</b>\n\nThis update was sent via the Post4U API!\n\n<b>Latest Updates:</b>\n✅ Discord Webhook integration is now verified and working.\n🚀 Started building the frontend using <b>Reflex</b>—no more Postman needed soon.\n\nNext goal: Reddit API approval. \n\nStar the progress: https://github.com/ShadowSlayer03/Post4U-Schedule-Social-Media-Posts",
+    "platforms": ["Telegram"],
+    "scheduled_time": "2026-03-03T10:30:00Z"
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
