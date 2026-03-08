@@ -23,17 +23,23 @@ body:json {
 
 body:multipart-form {
   content: '''
-    Testing out the brand-new image upload feature for tweets in #Post4U! 📸
+    Two of my Apify actors were quietly broken and I didn't notice 👀
     
-    I’m also currently diving deep into Reflex to build out a dedicated frontend for the app. Check out what I’m cooking here:
+    Market Gap Analyzer: runaway token usage on bad inputs
+    Fake Applicant Detector: silently failing health checks - root cause was Gemini being rate limited
     
-    🔗 https://github.com/ShadowSlayer03/Post4U-Schedule-Social-Media-Posts
+    Fixed both + refactored all 6 actors to use Gemini model rotation
+    Rate limit on one → auto-fallback to the next. No downtime, no manual intervention.
     
-    #BuildInPublic #OpenSource #Python #Reflex #WebDev
+    Spent the later part of my holiday doing infra work. 0 regrets.
+    
+    Building resilient > building new
+    
+    #BuildInPublic #Apify #IndieHacker #AIAgents #LLM #SideProject
   '''
   platforms: X
-  media: @file(D:\Projects_and_Docs\Post4U-Schedule-Social-Media-Posts\frontend\assets\post4u_poster_new.png)
-  scheduled_time: 2026-03-02T09:10:00.000Z
+  scheduled_time: 2026-03-04T02:00:00.000Z
+  ~media: 
 }
 
 settings {
