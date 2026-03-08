@@ -52,7 +52,8 @@ def footer() -> rx.Component:
                         _hover={"color": "#00FFB2"},
                         transition="color 0.2s",
                     ),
-                    rx.text("·", color="rgba(255,255,255,0.15)", font_size="0.72rem"),
+                    rx.text("·", color="rgba(255,255,255,0.15)",
+                            font_size="0.72rem"),
                     rx.link(
                         "GitHub",
                         href="https://github.com",
@@ -63,7 +64,8 @@ def footer() -> rx.Component:
                         _hover={"color": "#00FFB2"},
                         transition="color 0.2s",
                     ),
-                    rx.text("·", color="rgba(255,255,255,0.15)", font_size="0.72rem"),
+                    rx.text("·", color="rgba(255,255,255,0.15)",
+                            font_size="0.72rem"),
                     rx.link(
                         "Docs",
                         href="#setup",
@@ -85,7 +87,7 @@ def footer() -> rx.Component:
                 "Built with FastAPI · MongoDB · Tweepy · PRAW · APScheduler",
                 font_family="'DM Mono', monospace",
                 font_size="0.68rem",
-                color="rgba(255,255,255,0.12)",
+                color="rgba(255,255,255,0.35)",
                 letter_spacing="0.04em",
                 text_align="center",
                 padding_top="1.5em",
