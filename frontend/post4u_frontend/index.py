@@ -43,6 +43,7 @@ app = rx.App(
     ),
     stylesheets=[
         "https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Mono:wght@400;500;600&family=DM+Sans:wght@400;500&display=swap",
+        "/date-picker.css",
     ],
     style={
         "background": "#060608",

@@ -5,6 +5,6 @@ def post_to_reddit(content: str, subreddit: str):
         reddit = get_reddit_client()
         subreddit = reddit.subreddit(subreddit)
         submission = subreddit.submit_selfpost(title=content[:300], selftext=content)
-        return {"status": "success", "post_id": submission.id}
+        return {"status": "success", "platform_post_id": submission.id}
     except Exception as e:
         return {"status": "error", "message": str(e)}

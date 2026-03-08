@@ -12,7 +12,7 @@
 
 ## What is this?
 
-Social Autopilot is a **self-hosted social media scheduler** built with Python. Write a post once, publish it to multiple platforms instantly or at a scheduled time. No subscriptions, no data harvesting, no lock-in. Your keys, your server, your data.
+Post4U is a **self-hosted social media scheduler** built with Python. Write a post once, publish it to multiple platforms instantly or at a scheduled time. No subscriptions, no data harvesting, no lock-in. Your keys, your server, your data.
 
 **Supported platforms:**
 - **X (Twitter)** via Tweepy

@@ -31,7 +31,7 @@ def post_to_telegram(content: str) -> dict:
         data = response.json()
         message_id = data["result"]["message_id"]
         logger.info(f"Telegram message sent, message_id: {message_id}")
-        return {"status": "success", "message_id": message_id}
+        return {"status": "success", "platform_post_id": message_id}
     except requests.exceptions.HTTPError as e:
         try:
             error_description = response.json().get("description", str(e))

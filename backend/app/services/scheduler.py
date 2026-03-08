@@ -98,6 +98,7 @@ async def publish_with_retry(post_id: str, attempt: int = 1, retry_platforms: li
 class SchedulerService:
     async def schedule_post(self, post_id: str, run_at: datetime) -> str:
         """Add a one-shot job; returns the APScheduler job id."""
+        
         job = scheduler.add_job(
             publish_with_retry,
             "date",
@@ -108,11 +109,18 @@ class SchedulerService:
         )
         return job.id
 
-    async def cancel_post(self, job_id: str) -> None:
+    async def unschedule_post(self, job_id: str) -> bool:
+        """Remove a scheduled job by its ID. Returns True if removed, False if not found."""
+        if scheduler is None:
+            logger.error("Scheduler not initialized; cannot unschedule post %s", job_id)
+            return False
+        
         try:
             scheduler.remove_job(job_id)
-        except Exception:
-            pass
+            return True
+        except Exception as e:
+            logger.error("Failed to unschedule post %s, error: %s", job_id, e)
+            return False
 
 
 scheduler_service = SchedulerService()

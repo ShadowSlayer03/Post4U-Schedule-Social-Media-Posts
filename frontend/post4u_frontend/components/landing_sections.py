@@ -3,7 +3,7 @@ import reflex as rx
 
 # # # # # # # # # #
 # FEATURES SECTION
-# # # # # # # # # # 
+# # # # # # # # # #
 
 def feature_card(icon: str, title: str, description: str) -> rx.Component:
     return rx.box(
@@ -17,11 +17,11 @@ def feature_card(icon: str, title: str, description: str) -> rx.Component:
                 display="flex", align_items="center", justify_content="center",
             ),
             rx.text(title,
-                font_family="'Syne', sans-serif", font_size="0.98rem",
-                font_weight="700", color="white", margin_top="0.8em", letter_spacing="-0.01em"),
+                    font_family="'Syne', sans-serif", font_size="0.98rem",
+                    font_weight="700", color="white", margin_top="0.8em", letter_spacing="-0.01em"),
             rx.text(description,
-                font_family="'DM Sans', sans-serif", font_size="0.83rem",
-                color="rgba(255,255,255,0.32)", line_height="1.65"),
+                    font_family="'DM Sans', sans-serif", font_size="0.83rem",
+                    color="rgba(255,255,255,0.32)", line_height="1.65"),
             align="start", spacing="2",
         ),
         padding="1.8em",
@@ -43,8 +43,8 @@ def features_section() -> rx.Component:
     return rx.box(
         rx.vstack(
             rx.text("// FEATURES",
-                font_family="'DM Mono', monospace", font_size="0.7rem",
-                color="rgba(0,255,178,0.55)", letter_spacing="0.15em"),
+                    font_family="'DM Mono', monospace", font_size="0.7rem",
+                    color="rgba(0,255,178,0.55)", letter_spacing="0.15em"),
             rx.html("""<h2 style="
                 font-family: 'Syne', sans-serif;
                 font-size: clamp(3.5rem, 3.5vw, 2.7rem);
@@ -55,17 +55,17 @@ def features_section() -> rx.Component:
             </h2>"""),
             rx.grid(
                 feature_card("zap", "Instant Cross-posting",
-                    "One POST request publishes to all platforms simultaneously with per-platform success tracking."),
+                             "One POST request publishes to all platforms simultaneously with per-platform success tracking."),
                 feature_card("clock", "Reliable Scheduling",
-                    "APScheduler-powered jobs stored in MongoDB. No Redis overhead. Survives restarts."),
+                             "APScheduler-powered jobs stored in MongoDB. No Redis overhead. Survives restarts."),
                 feature_card("lock", "Your Data, Your Server",
-                    "Self-hosted means zero third-party access. Your API keys never leave your machine."),
+                             "Self-hosted means zero third-party access. Your API keys never leave your machine."),
                 feature_card("code-2", "FastAPI Backend",
-                    "Async Python with FastAPI + Beanie ODM. Typed, documented, and fast by default."),
+                             "Async Python with FastAPI + Beanie ODM. Typed, documented, and fast by default."),
                 feature_card("refresh-cw", "Smart Retry Logic",
-                    "Failed platforms don't block the rest. Partial success is tracked per post."),
+                             "Failed platforms don't block the rest. Partial success is tracked per post."),
                 feature_card("terminal", "Docker One-liner",
-                    "Full stack spins up with docker-compose up. MongoDB included. Zero config needed."),
+                             "Full stack spins up with docker-compose up. MongoDB included. Zero config needed."),
                 columns=rx.breakpoints(initial="1", sm="2", lg="3"),
                 spacing="4", width="100%", margin_top="3em",
             ),
@@ -81,7 +81,7 @@ def features_section() -> rx.Component:
 
 # # # # # # # # # #
 # PLATFORMS SECTION
-# # # # # # # # # # 
+# # # # # # # # # #
 
 def platform_card(icon: str, name: str, lib: str, description: str, color: str) -> rx.Component:
     return rx.box(
@@ -96,15 +96,17 @@ def platform_card(icon: str, name: str, lib: str, description: str, color: str) 
                     display="flex", align_items="center", justify_content="center",
                 ),
                 rx.vstack(
-                    rx.text(name, font_family="'Syne', sans-serif", font_size="0.93rem", font_weight="700", color="white"),
-                    rx.text(lib, font_family="'DM Mono', monospace", font_size="0.66rem", color=color, letter_spacing="0.04em"),
+                    rx.text(name, font_family="'Syne', sans-serif",
+                            font_size="0.93rem", font_weight="700", color="white"),
+                    rx.text(lib, font_family="'DM Mono', monospace",
+                            font_size="0.66rem", color=color, letter_spacing="0.04em"),
                     spacing="0", align="start",
                 ),
                 spacing="3", align="center",
             ),
             rx.text(description,
-                font_family="'DM Sans', sans-serif", font_size="0.82rem",
-                color="rgba(255,255,255,0.28)", line_height="1.6"),
+                    font_family="'DM Sans', sans-serif", font_size="0.82rem",
+                    color="rgba(255,255,255,0.28)", line_height="1.6"),
             align="start", spacing="3",
         ),
         padding="1.8em",
@@ -120,8 +122,8 @@ def platforms_section() -> rx.Component:
     return rx.box(
         rx.vstack(
             rx.text("// INTEGRATIONS",
-                font_family="'DM Mono', monospace", font_size="0.7rem",
-                color="rgba(0,255,178,0.55)", letter_spacing="0.15em"),
+                    font_family="'DM Mono', monospace", font_size="0.7rem",
+                    color="rgba(0,255,178,0.55)", letter_spacing="0.15em"),
             rx.html("""<h2 style="
                 font-family: 'Syne', sans-serif;
                 font-size: clamp(3.5rem, 3.5vw, 2.7rem);
@@ -130,13 +132,13 @@ def platforms_section() -> rx.Component:
                 Four platforms. One call.</h2>"""),
             rx.grid(
                 platform_card("twitter", "X (Twitter)", "tweepy v4",
-                    "Post tweets with full OAuth 1.0a. Read/write access, thread support coming soon.", "#1DA1F2"),
+                              "Post tweets with full OAuth 1.0a. Read/write access, thread support coming soon.", "#1DA1F2"),
                 platform_card("message-circle", "Reddit", "praw 7.x",
-                    "Submit text or link posts to any subreddit your account has posting access to.", "#FF4500"),
+                              "Submit text or link posts to any subreddit your account has posting access to.", "#FF4500"),
                 platform_card("send", "Telegram", "python-telegram-bot",
-                    "Post to any channel where your bot has admin rights. Markdown and HTML supported.", "#229ED9"),
+                              "Post to any channel where your bot has admin rights. Markdown and HTML supported.", "#229ED9"),
                 platform_card("hash", "Discord", "webhooks",
-                    "Zero-auth posting via webhooks. Create one in server settings, paste the URL. Done.", "#5865F2"),
+                              "Zero-auth posting via webhooks. Create one in server settings, paste the URL. Done.", "#5865F2"),
                 columns=rx.breakpoints(initial="1", sm="2"),
                 spacing="4", width="100%", margin_top="3em",
             ),
@@ -153,9 +155,9 @@ def platforms_section() -> rx.Component:
     )
 
 
-# # # # # # # # 
+# # # # # # # #
 # SETUP SECTION
-# # # # # # # # 
+# # # # # # # #
 
 def step_block(num: str, title: str, lines: list) -> rx.Component:
     return rx.box(
@@ -163,25 +165,27 @@ def step_block(num: str, title: str, lines: list) -> rx.Component:
             rx.hstack(
                 rx.box(
                     rx.text(num, font_family="'DM Mono', monospace", font_size="0.63rem",
-                        color="#060608", font_weight="700"),
+                            color="#060608", font_weight="700"),
                     background="#00FFB2", border_radius="50%",
                     width="22px", height="22px",
                     display="flex", align_items="center", justify_content="center",
                 ),
                 rx.text(title, font_family="'Syne', sans-serif", font_size="0.9rem",
-                    font_weight="700", color="white"),
+                        font_weight="700", color="white"),
                 spacing="3", align="center",
             ),
             rx.box(
                 rx.vstack(
                     *[rx.text(line,
-                        font_family="'DM Mono', monospace",
-                        font_size=rx.breakpoints(initial="0.7rem", md="0.77rem"),
-                        color="#00FFB2" if line.startswith("✓") else (
-                            "rgba(255,255,255,0.25)" if line.startswith("#") else "rgba(255,255,255,0.7)"
-                        ),
-                        white_space="pre",
-                    ) for line in lines],
+                              font_family="'DM Mono', monospace",
+                              font_size=rx.breakpoints(
+                                  initial="0.7rem", md="0.77rem"),
+                              color="#00FFB2" if line.startswith("✓") else (
+                                  "rgba(255,255,255,0.25)" if line.startswith(
+                                      "#") else "rgba(255,255,255,0.7)"
+                              ),
+                              white_space="pre",
+                              ) for line in lines],
                     spacing="1", align="start",
                 ),
                 background="rgba(0,0,0,0.45)",
@@ -202,8 +206,8 @@ def setup_section() -> rx.Component:
     return rx.box(
         rx.vstack(
             rx.text("// QUICK START",
-                font_family="'DM Mono', monospace", font_size="0.7rem",
-                color="rgba(0,255,178,0.55)", letter_spacing="0.15em"),
+                    font_family="'DM Mono', monospace", font_size="0.7rem",
+                    color="rgba(0,255,178,0.55)", letter_spacing="0.15em"),
             rx.html("""<h2 style="
                 font-family: 'Syne', sans-serif;
                 font-size: clamp(3.5rem, 3.5vw, 2.7rem);
@@ -236,16 +240,17 @@ def setup_section() -> rx.Component:
                 rx.hstack(
                     rx.icon("book-open", size=15, color="#060608"),
                     rx.text("Full docs in README",
-                        font_family="'DM Mono', monospace", font_size="0.78rem",
-                        color="#060608", font_weight="700"),
+                            font_family="'DM Mono', monospace", font_size="0.78rem",
+                            color="#060608", font_weight="700"),
                     spacing="2", align="center",
                 ),
-                href="https://github.com", text_decoration="none",
+                href="https://github.com/ShadowSlayer03/Post4U-Schedule-Social-Media-Posts", text_decoration="none",
                 padding_x="2em", padding_y="0.85em",
                 background="#00FFB2", border_radius="8px",
                 margin_top="2em",
                 box_shadow="0 0 30px rgba(0,255,178,0.2)",
-                _hover={"box_shadow": "0 0 40px rgba(0,255,178,0.35)", "transform": "translateY(-1px)"},
+                _hover={
+                    "box_shadow": "0 0 40px rgba(0,255,178,0.35)", "transform": "translateY(-1px)"},
                 transition="all 0.2s ease",
             ),
             spacing="4", align="center", width="100%",

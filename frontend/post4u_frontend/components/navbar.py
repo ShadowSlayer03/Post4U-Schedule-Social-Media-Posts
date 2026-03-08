@@ -49,7 +49,8 @@ def navbar() -> rx.Component:
             rx.hstack(
                 rx.link(
                     rx.hstack(
-                        rx.icon("github", size=13, color="rgba(255,255,255,0.5)"),
+                        rx.icon("github", size=13,
+                                color="rgba(255,255,255,0.5)"),
                         rx.text(
                             "Star",
                             font_family="'DM Mono', monospace",
@@ -60,7 +61,7 @@ def navbar() -> rx.Component:
                         spacing="2",
                         align="center",
                     ),
-                    href="https://github.com",
+                    href="https://github.com/ShadowSlayer03/Post4U-Schedule-Social-Media-Posts",
                     text_decoration="none",
                     padding_x="1em",
                     padding_y="0.5em",

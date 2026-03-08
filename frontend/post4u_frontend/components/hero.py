@@ -4,6 +4,7 @@ import reflex as rx
 # HERO SECTION
 # # # # # # # #
 
+
 def hero_section() -> rx.Component:
     return rx.box(
         rx.box(
@@ -23,10 +24,11 @@ def hero_section() -> rx.Component:
         rx.vstack(
             rx.box(
                 rx.hstack(
-                    rx.box(width="5px", height="5px", background="#00FFB2", border_radius="50%", box_shadow="0 0 6px #00FFB2"),
+                    rx.box(width="5px", height="5px", background="#00FFB2",
+                           border_radius="50%", box_shadow="0 0 6px #00FFB2"),
                     rx.text("Open Source · Self-Hosted · No Subscriptions",
-                        font_family="'DM Mono', monospace", font_size="0.68rem",
-                        letter_spacing="0em", color="rgba(0,255,178,0.8)", font_weight="500"),
+                            font_family="'DM Mono', monospace", font_size="0.68rem",
+                            letter_spacing="0em", color="rgba(0,255,178,0.8)", font_weight="500"),
                     spacing="2", align="center",
                 ),
                 padding_x="1.2em", padding_y="0.45em",
@@ -47,7 +49,7 @@ def hero_section() -> rx.Component:
             <span style="background: linear-gradient(135deg, #00FFB2 0%, #00C8FF 100%);
                 -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
                 Reach everywhere.</span></h1>"""
-            ),
+                    ),
             rx.text(
                 "Schedule and cross-post to X, Reddit, Telegram, and Discord from a single API. Deploy in 60 seconds with Docker.",
                 font_family="'DM Sans', sans-serif",
@@ -60,27 +62,30 @@ def hero_section() -> rx.Component:
                     rx.hstack(
                         rx.icon("terminal", size=14, color="#060608"),
                         rx.text("docker-compose up", font_family="'DM Mono', monospace",
-                            font_size="0.8rem", font_weight="700", color="#060608"),
+                                font_size="0.8rem", font_weight="700", color="#060608"),
                         spacing="2", align="center",
                     ),
                     href="#setup", text_decoration="none",
                     padding_x="1.8em", padding_y="0.75em",
                     background="#00FFB2", border_radius="8px",
                     box_shadow="0 0 30px rgba(0,255,178,0.25), 0 4px 24px rgba(0,0,0,0.4)",
-                    _hover={"background": "#00e6a0", "box_shadow": "0 0 40px rgba(0,255,178,0.4)", "transform": "translateY(-1px)"},
+                    _hover={"background": "#00e6a0",
+                            "box_shadow": "0 0 40px rgba(0,255,178,0.4)", "transform": "translateY(-1px)"},
                     transition="all 0.2s ease",
                 ),
                 rx.link(
                     rx.hstack(
-                        rx.icon("github", size=14, color="rgba(255,255,255,0.55)"),
+                        rx.icon("github", size=14,
+                                color="rgba(255,255,255,0.55)"),
                         rx.text("View Source", font_family="'DM Mono', monospace",
-                            font_size="0.8rem", color="rgba(255,255,255,0.55)"),
+                                font_size="0.8rem", color="rgba(255,255,255,0.55)"),
                         spacing="2", align="center",
                     ),
                     href="https://github.com", text_decoration="none",
                     padding_x="1.8em", padding_y="0.75em",
                     border="1px solid rgba(255,255,255,0.1)", border_radius="8px",
-                    _hover={"border_color": "rgba(0,255,178,0.3)", "background": "rgba(0,255,178,0.04)", "transform": "translateY(-1px)"},
+                    _hover={
+                        "border_color": "rgba(0,255,178,0.3)", "background": "rgba(0,255,178,0.04)", "transform": "translateY(-1px)"},
                     transition="all 0.2s ease",
                 ),
                 spacing="4", flex_wrap="wrap", justify="center",
@@ -89,28 +94,36 @@ def hero_section() -> rx.Component:
                 rx.vstack(
                     rx.hstack(
                         rx.hstack(
-                            rx.box(width="10px", height="10px", background="#FF5F57", border_radius="50%"),
-                            rx.box(width="10px", height="10px", background="#FEBC2E", border_radius="50%"),
-                            rx.box(width="10px", height="10px", background="#28C840", border_radius="50%"),
+                            rx.box(width="10px", height="10px",
+                                   background="#FF5F57", border_radius="50%"),
+                            rx.box(width="10px", height="10px",
+                                   background="#FEBC2E", border_radius="50%"),
+                            rx.box(width="10px", height="10px",
+                                   background="#28C840", border_radius="50%"),
                             spacing="2",
                         ),
                         rx.text("post4u — curl", font_family="'DM Mono', monospace",
-                            font_size="0.68rem", color="rgba(255,255,255,0.2)"),
+                                font_size="0.68rem", color="rgba(255,255,255,0.2)"),
                         justify="between", width="100%",
                     ),
-                    rx.box(height="1px", width="100%", background="rgba(255,255,255,0.05)"),
+                    rx.box(height="1px", width="100%",
+                           background="rgba(255,255,255,0.05)"),
                     rx.vstack(
                         rx.text('$ curl -X POST http://localhost:8000/posts/ \\',
-                            font_family="'DM Mono', monospace", font_size=rx.breakpoints(initial="0.68rem", md="0.76rem"), color="rgba(255,255,255,0.6)"),
+                                font_family="'DM Mono', monospace", font_size=rx.breakpoints(initial="0.68rem", md="0.76rem"), color="rgba(255,255,255,0.6)"),
                         rx.text('  -d \'{"content": "Shipped something new 🚀",',
-                            font_family="'DM Mono', monospace", font_size=rx.breakpoints(initial="0.68rem", md="0.76rem"), color="rgba(255,255,255,0.6)", padding_left="1em"),
+                                font_family="'DM Mono', monospace", font_size=rx.breakpoints(initial="0.68rem", md="0.76rem"), color="rgba(255,255,255,0.6)", padding_left="1em"),
                         rx.text('       "platforms": ["x","reddit","telegram","discord"]}\'',
-                            font_family="'DM Mono', monospace", font_size=rx.breakpoints(initial="0.68rem", md="0.76rem"), color="rgba(255,255,255,0.6)", padding_left="1em"),
+                                font_family="'DM Mono', monospace", font_size=rx.breakpoints(initial="0.68rem", md="0.76rem"), color="rgba(255,255,255,0.6)", padding_left="1em"),
                         rx.box(height="0.4em"),
-                        rx.text('✓  x         tweet_id: 1234567890', font_family="'DM Mono', monospace", font_size=rx.breakpoints(initial="0.68rem", md="0.76rem"), color="#00FFB2"),
-                        rx.text('✓  reddit    post_id:  t3_abc123', font_family="'DM Mono', monospace", font_size=rx.breakpoints(initial="0.68rem", md="0.76rem"), color="#00FFB2"),
-                        rx.text('✓  telegram  msg_id:   987654', font_family="'DM Mono', monospace", font_size=rx.breakpoints(initial="0.68rem", md="0.76rem"), color="#00FFB2"),
-                        rx.text('✓  discord   status:   204', font_family="'DM Mono', monospace", font_size=rx.breakpoints(initial="0.68rem", md="0.76rem"), color="#00FFB2"),
+                        rx.text('✓  x         tweet_id: 1234567890', font_family="'DM Mono', monospace",
+                                font_size=rx.breakpoints(initial="0.68rem", md="0.76rem"), color="#00FFB2"),
+                        rx.text('✓  reddit    post_id:  t3_abc123', font_family="'DM Mono', monospace",
+                                font_size=rx.breakpoints(initial="0.68rem", md="0.76rem"), color="#00FFB2"),
+                        rx.text('✓  telegram  msg_id:   987654', font_family="'DM Mono', monospace",
+                                font_size=rx.breakpoints(initial="0.68rem", md="0.76rem"), color="#00FFB2"),
+                        rx.text('✓  discord   status:   204', font_family="'DM Mono', monospace", font_size=rx.breakpoints(
+                            initial="0.68rem", md="0.76rem"), color="#00FFB2"),
                         align="start", spacing="1",
                     ),
                     spacing="3", width="100%",
@@ -141,9 +154,9 @@ def hero_section() -> rx.Component:
 def stat_item(number: str, label: str) -> rx.Component:
     return rx.vstack(
         rx.text(number, font_family="'Syne', sans-serif", font_size="1.9rem",
-            font_weight="700", color="white", letter_spacing="-0.03em"),
+                font_weight="700", color="white", letter_spacing="-0.03em"),
         rx.text(label, font_family="'DM Mono', monospace", font_size="0.68rem",
-            color="rgba(255,255,255,0.28)", letter_spacing="0.08em", text_transform="uppercase"),
+                color="rgba(255,255,255,0.28)", letter_spacing="0.08em", text_transform="uppercase"),
         spacing="1", align="center",
     )
 
@@ -152,11 +165,14 @@ def stats_bar() -> rx.Component:
     return rx.box(
         rx.hstack(
             stat_item("4", "Platforms"),
-            rx.box(width="1px", height="40px", background="rgba(255,255,255,0.07)"),
+            rx.box(width="1px", height="40px",
+                   background="rgba(255,255,255,0.07)"),
             stat_item("1", "API Call"),
-            rx.box(width="1px", height="40px", background="rgba(255,255,255,0.07)"),
+            rx.box(width="1px", height="40px",
+                   background="rgba(255,255,255,0.07)"),
             stat_item("60s", "Deploy Time"),
-            rx.box(width="1px", height="40px", background="rgba(255,255,255,0.07)"),
+            rx.box(width="1px", height="40px",
+                   background="rgba(255,255,255,0.07)"),
             stat_item("$0", "Monthly Cost"),
             spacing="8", justify="center", align="center", flex_wrap="wrap",
         ),
