@@ -1,9 +1,17 @@
 from typing import List, Optional
 from beanie import Document
 from datetime import datetime, timezone
-from pydantic import field_validator
+from pydantic import BaseModel, Field, field_validator
+from beanie import Document, before_event, Insert, Update, SaveChanges, Replace
 
-class Post(Document):
+class TimestampMixin(BaseModel):
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+    @before_event(Insert)
+    def set_created_at(self):
+        self.created_at = datetime.now(timezone.utc)
+
+class Post(TimestampMixin, Document):
     content: str
     platforms: List[str]
     scheduled_time: Optional[datetime] = None
