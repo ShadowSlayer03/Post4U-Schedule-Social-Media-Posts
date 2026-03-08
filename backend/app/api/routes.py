@@ -11,15 +11,27 @@ import shutil
 
 router = APIRouter()
 
+# Healthcheck 
 @router.get("/")
 async def read_root():
     return {"message": "Welcome to Post4U - Open Source, Self-Hostable Post Scheduler API"}
 
+# Get all posts
 @router.get("/posts/")
 async def get_posts():
     posts = await Post.find_all().to_list()
-    return posts
+    if not posts:
+        return {"message": "No posts found", "posts": [], "status_code": 404 }
+    
+    serialized = []
+    for post in posts:
+        data = post.model_dump()
+        data["id"] = str(post.id)
+        serialized.append(data)
 
+    return {"message": f"{len(posts)} posts found", "posts": serialized, "status_code": 200 }
+
+# Create a new post (with optional scheduling)
 @router.post("/posts/")
 async def create_post(
     content: str = Form(...),
@@ -27,6 +39,7 @@ async def create_post(
     scheduled_time: str = Form(None),
     media: UploadFile = File(None)
 ):
+    
     media_path = None
     if media:
         static_dir = "app/static"
@@ -51,7 +64,7 @@ async def create_post(
 
     if post.scheduled_time and post.scheduled_time > datetime.now(timezone.utc):
         job_id = await scheduler_service.schedule_post(str(post.id), post.scheduled_time)
-        return {"message": "Post scheduled", "post_id": str(post.id), "job_id": job_id}
+        return { "message": "Post scheduled", "post_id": str(post.id), "job_id": job_id, "status_code": 200 }
 
     results = {}
     for platform in post.platforms:
@@ -59,4 +72,17 @@ async def create_post(
 
     post.status = results
     await post.save()
-    return {"message": "Post published", "post_id": str(post.id), "results": results}
+    return { "message": "Post published", "post_id": str(post.id), "results": results, "status_code": 200 }
+
+# Unschedule posts
+@router.post("/posts/{id}/unschedule/")
+async def unschedule_post(id: str):
+    post = await Post.get(id)
+    if post is None:
+        return { "message": "Post not found", "post_id": id, "status_code": 404 }
+    await post.delete()
+    
+    success = await scheduler_service.unschedule_post(id)
+    if success:
+        return { "message": "Post unscheduled", "post_id": id, "status_code": 200 }
+    return { "message": "Post not found or not scheduled", "post_id": id, "status_code": 404 }
