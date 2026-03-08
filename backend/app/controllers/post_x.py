@@ -22,7 +22,7 @@ def post_tweet(content: str, media_path: str = None):
         response = client.create_tweet(text=content, media_ids=media_ids if media_ids else None)
         
         logger.info(f"Tweet ID: {response.data['id']}")
-        return { "status": "success", "tweet_id": response.data['id'] }
+        return { "status": "success", "platform_post_id": response.data['id'] }
     
     except Exception as e:
         logger.error(f"Error: {e}")
