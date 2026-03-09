@@ -16,7 +16,7 @@ class Post(TimestampMixin, Document):
     platforms: List[str]
     scheduled_time: Optional[datetime] = None
     status: dict = {}
-    media_path: Optional[str] = None
+    media_paths: List[str] = Field(default_factory=list)
 
     @field_validator("platforms", mode="before")
     @classmethod
