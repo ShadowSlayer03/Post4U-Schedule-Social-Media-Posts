@@ -1,15 +1,20 @@
 import uuid
-
-from fastapi import APIRouter, UploadFile, File, Form
+import os
+from fastapi import APIRouter, UploadFile, File, Form, HTTPException, status
+from fastapi.concurrency import run_in_threadpool
 from werkzeug.utils import secure_filename
 from app.models.post import Post
 from app.services.publisher import publish_to_platform
 from app.services.scheduler import scheduler_service
 from datetime import datetime, timezone
-import os
-import shutil
+from app.api.utils.check_files import check_files
 
 router = APIRouter()
+
+MAX_UPLOAD_SIZE = 10 * 1024 * 1024  
+MAX_FILES = 4                        
+ALLOWED_MIME_TYPES = {"image/jpeg", "image/png", "image/gif", "video/mp4", "video/quicktime", "video/x-msvideo"}
+ALLOWED_PLATFORMS = {"x", "reddit", "telegram", "discord"}
 
 # Get all posts
 @router.get("/posts/")
@@ -32,28 +37,47 @@ async def create_post(
     content: str = Form(...),
     platforms: str = Form(...),
     scheduled_time: str = Form(None),
-    media: UploadFile = File(None)
+    media: list[UploadFile] = File(default=[])
 ):
-    
-    media_path = None
+    platform_list = [p.strip().lower() for p in platforms.split(",")]
+    invalid_platforms = set(platform_list) - ALLOWED_PLATFORMS
+    if invalid_platforms:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Unknown platform(s): {', '.join(invalid_platforms)}. Allowed: {', '.join(ALLOWED_PLATFORMS)}"
+        )
+
+    media_paths = []
+
     if media:
+        if len(media) > MAX_FILES:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"You can upload up to {MAX_FILES} media files per post."
+            )
+        
+        validated_results = await check_files(media)
+
         static_dir = "app/static"
         os.makedirs(static_dir, exist_ok=True)
-        
-        ext = os.path.splitext(media.filename)[1]
-        
-        unique_name = f"{uuid.uuid4().hex}{ext}"
-        safe_name = secure_filename(unique_name)
-        
-        media_path = os.path.join(static_dir, safe_name)
-        with open(media_path, "wb") as buffer:
-            shutil.copyfileobj(media.file, buffer)
+
+        for item in validated_results:
+            ext = os.path.splitext(item["filename"])[1].lower()
+            safe_name = secure_filename(f"{uuid.uuid4().hex}{ext}")
+            media_path = os.path.join(static_dir, safe_name)
+
+            def _write_file(path=media_path, data=item["bytes"]):
+                with open(path, "wb") as f:
+                    f.write(data)
+
+            await run_in_threadpool(_write_file)
+            media_paths.append(media_path)
 
     post = Post(
         content=content,
-        platforms=[p.strip().lower() for p in platforms.split(",")],
+        platforms=platform_list,
         scheduled_time=datetime.fromisoformat(scheduled_time) if scheduled_time else None,
-        media_path=media_path
+        media_paths=media_paths
     )
     await post.insert()
 
@@ -63,7 +87,7 @@ async def create_post(
 
     results = {}
     for platform in post.platforms:
-        results[platform] = await publish_to_platform(platform, post.content, post.media_path)
+        results[platform] = await publish_to_platform(platform, post.content, post.media_paths)
 
     post.status = results
     await post.save()
