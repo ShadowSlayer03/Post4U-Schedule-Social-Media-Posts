@@ -289,31 +289,7 @@ No OAuth, no bot, no approval needed.
 
 ## Environment Variables Reference
 
-```env
-# MongoDB
-MONGO_URI=mongodb://mongo:27017
-DATABASE_NAME=post_scheduler
-
-# X / Twitter
-TWITTER_API_KEY=
-TWITTER_API_SECRET=
-TWITTER_API_ACCESS_TOKEN=
-TWITTER_API_ACCESS_TOKEN_SECRET=
-
-# Reddit
-REDDIT_CLIENT_ID=
-REDDIT_CLIENT_SECRET=
-REDDIT_USERNAME=
-REDDIT_PASSWORD=
-REDDIT_SUBREDDIT=
-
-# Telegram
-TELEGRAM_BOT_TOKEN=
-TELEGRAM_CHANNEL_ID=
-
-# Discord
-DISCORD_WEBHOOK_URL=
-```
+Refer to .env.example files in both frontend and backend folders.
 
 Leave any value blank to disable that platform. The app won't crash, it'll just skip it.
 
