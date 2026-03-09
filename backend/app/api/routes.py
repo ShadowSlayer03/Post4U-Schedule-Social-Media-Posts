@@ -11,11 +11,6 @@ import shutil
 
 router = APIRouter()
 
-# Healthcheck 
-@router.get("/")
-async def read_root():
-    return {"message": "Welcome to Post4U - Open Source, Self-Hostable Post Scheduler API"}
-
 # Get all posts
 @router.get("/posts/")
 async def get_posts():

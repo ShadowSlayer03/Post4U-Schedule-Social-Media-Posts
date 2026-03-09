@@ -26,8 +26,18 @@ class Settings(BaseSettings):
     # Discord
     DISCORD_WEBHOOK_URL: str = ""
 
+    # Post4U API
+    POST4U_API_KEY: str = ""
+
     class Config:
         env_file = ".env"
         extra = "allow"
 
 settings = Settings()
+
+# Refuse to start if no key is set — an empty key means zero authentication
+if not settings.POST4U_API_KEY:
+    raise RuntimeError(
+        "POST4U_API_KEY is not set in .env — server refused to start. "
+        "Generate one with: python -c \"import secrets; print(secrets.token_hex(32))\""
+    )

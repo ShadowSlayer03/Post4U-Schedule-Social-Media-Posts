@@ -58,6 +58,7 @@ A self-hosted open source backend for scheduling and automatically posting conte
 #### Example: Post immediately to multiple platforms
 ```bash
 curl -X POST http://localhost:8000/posts/ \
+  -H "X-API-Key: your_api_key_here" \
   -H "Content-Type: application/json" \
   -d '{
     "content": "Hello world from Post4U!",
@@ -68,6 +69,7 @@ curl -X POST http://localhost:8000/posts/ \
 #### Example: Schedule a post
 ```bash
 curl -X POST http://localhost:8000/posts/ \
+  -H "X-API-Key: your_api_key_here" \
   -H "Content-Type: application/json" \
   -d '{
     "content": "This drops at 9am sharp.",
@@ -82,7 +84,7 @@ curl -X POST http://localhost:8000/posts/ \
 
 #### Example: View all posts
 ```bash
-curl http://localhost:8000/posts/
+curl -H "X-API-Key: your_api_key_here" http://localhost:8000/posts/
 ```
 
 ### How Scheduling Works
@@ -109,6 +111,27 @@ MIT License
 
 ### Maintainers
 - ShadowSlayer03 (Admin)
+
+### Security
+
+All API endpoints (except the healthcheck `GET /`) require a valid `X-API-Key` header.
+
+**Setup:**
+1. Generate a key:
+   ```bash
+   python -c "import secrets; print(secrets.token_hex(32))"
+   ```
+2. Add it to your `.env`:
+   ```env
+   POST4U_API_KEY=your_generated_key_here
+   ```
+3. Pass it as a header in every request:
+   ```bash
+   curl -H "X-API-Key: your_generated_key_here" http://localhost:8000/posts/
+   ```
+
+> The server **refuses to start** if `POST4U_API_KEY` is not set — this is intentional.
+> Never commit your `.env` file to git.
 
 ---
 For frontend setup and full project details, see the main project README.

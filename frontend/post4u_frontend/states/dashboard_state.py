@@ -1,4 +1,5 @@
 from datetime import datetime
+import os
 import reflex as rx
 import httpx
 import pytz
@@ -6,6 +7,9 @@ import asyncio
 from tzlocal import get_localzone
 from pydantic import BaseModel
 from typing import Optional
+from dotenv import load_dotenv
+
+load_dotenv()
 
 
 class PlatformStatus(BaseModel):
@@ -158,11 +162,16 @@ class DashboardState(rx.State):
                     "media": (self.media_file[0], self.media_file[1], self.media_file[2])
                 }
 
+            api_key = os.getenv("POST4U_API_KEY")
+
             async with httpx.AsyncClient() as client:
                 r = await client.post(
                     "http://localhost:8000/posts/",
                     data=data,
                     files=files,
+                    headers={
+                        "X-API-Key": api_key
+                    },
                     timeout=10
                 )
                 if r.status_code == 200:
@@ -171,10 +180,8 @@ class DashboardState(rx.State):
                 else:
                     yield rx.toast.error(f"Error: {r.text}", duration=5000)
 
-
         except Exception as e:
             yield rx.toast.error(f"Connection error: {str(e)}", duration=5000)
-
 
         self.is_posting = False
 
@@ -184,18 +191,21 @@ class DashboardState(rx.State):
         yield
         try:
             async with httpx.AsyncClient() as client:
-                r = await client.get("http://localhost:8000/posts/", timeout=10)
+                api_key = os.getenv("POST4U_API_KEY")
+                r = await client.get("http://localhost:8000/posts/", timeout=10,
+                                     headers={
+                                         "X-API-Key": api_key
+                                     })
                 if r.status_code == 200:
                     raw_posts = r.json().get("posts", [])
                     self.posts = [PostRecord(**p)
                                   for p in raw_posts]
                     yield rx.toast.success(f"Successfully loaded {len(self.posts)} posts.", duration=5000)
-        # Handle this better           
+        # Handle this better
         except Exception as e:
             yield rx.toast.error(f"Could not load posts: {str(e)}", duration=5000)
         finally:
             self.is_refreshing = False
-
 
     @rx.event
     async def unschedule_post(self):
@@ -208,15 +218,21 @@ class DashboardState(rx.State):
 
         try:
             async with httpx.AsyncClient() as client:
+                api_key = os.getenv("POST4U_API_KEY")
                 r = await client.post(
-                    f"http://localhost:8000/posts/{self.delete_post_id}/unschedule",
-                    timeout=10
+                    f"http://localhost:8000/posts/{self.delete_post_id}/unschedule/",
+                    timeout=10,
+                    headers={
+                        "X-API-Key": api_key
+                    }
                 )
+                
                 if r.status_code == 200:
                     yield rx.toast.success(r.json().get("message", "Post unscheduled successfully!"), duration=5000)
                     self.delete_post_id = ""
                     yield DashboardState.load_posts
                 else:
+                    print(r)
                     yield rx.toast.error(f"Error: {r.text}", duration=5000)
 
         except Exception as e:

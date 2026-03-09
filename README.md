@@ -27,15 +27,20 @@ Post4U is a **self-hosted social media scheduler** built with Python. Write a po
 - ✅ Post immediately or schedule for a future time
 - ✅ Cross-post to multiple platforms in one request
 - ✅ Per-platform success/failure tracking
-- ✅ MongoDB-backed post history
+- ✅ MongoDB-backed post history with timestamps
 - ✅ Persistent scheduling — jobs survive server restarts via MongoDB job store
 - ✅ Per-platform retry logic — only failed platforms are retried (up to 3 attempts)
 - ✅ Platforms with missing credentials are skipped gracefully, not crashed
+- ✅ API key authentication — all endpoints protected via X-API-Key header
+- ✅ Rate limiting — prevents abuse and DoS attacks
 - ✅ Simple REST API — connect any frontend or call it from scripts
 - ✅ APScheduler with MongoDBJobStore (no Redis, no Celery — just runs)
 - ✅ Docker Compose setup — one command and you're live
-- 🔜 Reflex web dashboard (in progress)
-- 🔜 AI-powered post suggestions from Reddit/X trends
+- ✅ Reflex web dashboard — compose, schedule, view history and unschedule posts
+- 🔜 Image/media attachment support & security
+- 🔜 Bluesky and Mastodon integration
+- 🔜 OG link preview before scheduling
+- 🔜 AI-powered post suggestions
 
 ---
 
@@ -96,6 +101,7 @@ Look for: `INFO: ✅ Scheduler started and MongoDB connected`
 Replace the platforms with ones you have configured in `.env`:
 ```bash
 curl -X POST http://localhost:8000/posts/ \
+  -H "X-API-Key: your_api_key_here" \
   -H "Content-Type: application/json" \
   -d '{
     "content": "Testing Post4U! 🚀",
@@ -108,6 +114,7 @@ curl -X POST http://localhost:8000/posts/ \
 ```bash
 # Example for a time in the future
 curl -X POST http://localhost:8000/posts/ \
+  -H "X-API-Key: your_api_key_here" \
   -H "Content-Type: application/json" \
   -d '{
     "content": "This is a scheduled message.",
@@ -119,6 +126,8 @@ curl -X POST http://localhost:8000/posts/ \
 ---
 
 ## Without Docker (Local Dev)
+
+### Backend:
 
 Requires [uv](https://github.com/astral-sh/uv) and a running MongoDB instance.
 
@@ -133,6 +142,42 @@ uv run uvicorn app.main:app --reload --port 8000
 uv run uvicorn app.main:app --reload --log-level debug
 ```
 
+### Frontend:
+
+```bash
+# Run the frontend - requires 2 ports
+uv run reflex run
+
+# Run with all logs enabled
+uv run reflex run --loglevel debug
+```
+
+---
+
+## Security
+
+Post4U uses API key authentication on all endpoints.
+
+### Setup
+1. Generate a key:
+   ```bash
+   python -c "import secrets; print(secrets.token_hex(32))"
+   ```
+2. Add it to your `.env`:
+   ```env
+   POST4U_API_KEY=your_generated_key_here
+   ```
+3. Pass it as a header in every request:
+   ```bash
+   curl -X POST http://localhost:8000/posts/ \
+     -H "X-API-Key: your_generated_key_here" \
+     -H "Content-Type: application/json" \
+     -d '{"content": "Hello!", "platforms": ["discord"]}'
+   ```
+
+> The server will **refuse to start** if `API_KEY` is not set.
+> Never commit your `.env` file to git.
+
 ---
 
 ## Usage
@@ -141,6 +186,7 @@ uv run uvicorn app.main:app --reload --log-level debug
 
 ```bash
 curl -X POST http://localhost:8000/posts/ \
+  -H "X-API-Key: your_api_key_here" \
   -H "Content-Type: application/json" \
   -d '{
     "content": "Hello world from Social Autopilot!",
@@ -152,6 +198,7 @@ curl -X POST http://localhost:8000/posts/ \
 
 ```bash
 curl -X POST http://localhost:8000/posts/ \
+  -H "X-API-Key: your_api_key_here" \
   -H "Content-Type: application/json" \
   -d '{
     "content": "This drops at 9am sharp.",
@@ -163,7 +210,7 @@ curl -X POST http://localhost:8000/posts/ \
 ### View all posts
 
 ```bash
-curl http://localhost:8000/posts/
+curl -H "X-API-Key: your_api_key_here" http://localhost:8000/posts/
 ```
 
 ### API Docs
@@ -337,4 +384,4 @@ MIT — do whatever you want with it.
 
 ---
 
-<p align="center">Built with FastAPI · MongoDB · Tweepy · PRAW · APScheduler<br>No VC funding. No tracking. Just vibes.</p>
+<p align="center">Built with FastAPI · MongoDB · Tweepy · PRAW · APScheduler · Reflex<br>No VC funding. No tracking. Just vibes.</p>
