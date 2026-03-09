@@ -3,7 +3,6 @@ import os
 import reflex as rx
 import httpx
 import pytz
-import asyncio
 from tzlocal import get_localzone
 from pydantic import BaseModel
 from typing import Optional
@@ -33,7 +32,7 @@ class DashboardState(rx.State):
     content: str = ""
     platforms: list[str] = []
     scheduled_time: str | None = None
-    media_file: tuple[str, bytes, str] | None = None
+    media_files: list[tuple[str, bytes, str]] = []
     posts: list[PostRecord] = []
     is_posting: bool = False
     is_refreshing: bool = False
@@ -52,8 +51,8 @@ class DashboardState(rx.State):
         self.active_tab = tab
 
     @rx.event
-    def set_media_file(self, media_file: tuple[str, bytes, str] | None):
-        self.media_file = media_file
+    def set_media_files(self, media_files: list[tuple[str, bytes, str]]):
+        self.media_files = media_files
 
     @rx.event
     def toggle_platform(self, platform: str):
@@ -84,13 +83,19 @@ class DashboardState(rx.State):
         self.content = ""
         self.platforms = []
         self.scheduled_time = None
-        self.media_file = None
+        self.media_files = []
 
     @rx.event
     async def handle_upload(self, files: list[rx.UploadFile]):
+        if len(files) > 4:
+            yield rx.toast.warning("You can only upload up to 4 media files per post.", duration=5000)
+            return
+
+        new_files = []
         for file in files:
             upload_data = await file.read()
-            self.media_file = (file.filename, upload_data, file.content_type)
+            new_files.append((file.filename, upload_data, file.content_type))
+        self.media_files = new_files
 
     def _parse_to_utc(self, raw_time: str) -> str | None:
         """
@@ -157,10 +162,8 @@ class DashboardState(rx.State):
                 data["scheduled_time"] = utc_iso
 
             files = None
-            if self.media_file:
-                files = {
-                    "media": (self.media_file[0], self.media_file[1], self.media_file[2])
-                }
+            if self.media_files:
+                files = [("media", (f[0], f[1], f[2])) for f in self.media_files]
 
             api_key = os.getenv("POST4U_API_KEY")
 
