@@ -1,6 +1,7 @@
 alembic==1.18.4
 annotated-types==0.7.0
 anyio==4.12.1
+beautifulsoup4==4.14.3
 bidict==0.23.1
 certifi==2026.2.25
 click==8.3.1
@@ -31,6 +32,7 @@ reflex==0.8.27
 reflex-hosting-cli==0.1.61
 rich==14.3.3
 simple-websocket==1.1.0
+soupsieve==2.8.3
 sqlalchemy==2.0.48
 sqlmodel==0.0.37
 starlette==0.52.1

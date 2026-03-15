@@ -11,6 +11,7 @@ from .helpers import (
 )
 from .buttons import post_btn, unschedule_btn, refresh_posts_btn
 from .custom_select import custom_select
+from .post_preview import platform_previews_panel
 
 # # # # # # # # # #
 # DASHBOARD TABS
@@ -18,303 +19,334 @@ from .custom_select import custom_select
 
 
 def schedule_tab() -> rx.Component:
-    return rx.vstack(
-        slabel("// schedule post"),
-        rx.hstack(
-            rx.link(
-                rx.hstack(
-                    rx.icon("arrow-left", size=11,
-                            color="rgba(255,255,255,0.5)"),
-                    rx.text("Home", font_family="'DM Mono', monospace",
-                            font_size="0.9rem", color="rgba(255,255,255,0.5)"),
-                    spacing="2", align="center",
-                ),
-                href="/", text_decoration="none",
-                _hover={"opacity": "0.7"}, transition="opacity 0.15s",
-            ),
-            height="100%", spacing="1", align="start", width="100%",
-        ),
-        rx.html(
-            '<h2 style="font-family:Syne,sans-serif;font-size:1.6rem;font-weight:800;color:white;margin:0 0 0.1em 0;letter-spacing:-0.02em">Schedule a Post</h2>'
-        ),
-        rx.text(
-            "Set platforms, write content, pick a time. Leave time blank to post immediately.",
-            font_family="'DM Sans', sans-serif",
-            font_size="0.82rem",
-            color="rgba(255,255,255,0.27)",
-            margin_bottom="1em",
-        ),
+    return rx.hstack(
         rx.vstack(
-            flabel("Content"), content_area(), spacing="2", width="100%", align="start"
-        ),
-        rx.vstack(
-            flabel("Platforms"), prow(), spacing="2", width="100%", align="start"
-        ),
-        rx.vstack(
-            flabel("Scheduled Time (ISO 8601 — optional)"),
-            date_picker(
-                selected=DashboardState.scheduled_time,
-                on_change=DashboardState.set_scheduled_time,
-                **input_style()
-            ),
-            spacing="2",
-            width="100%",
-            align="start",
-        ),
-        rx.vstack(
-            flabel("Media (optional — up to 4 files)"),
-            rx.upload(
-                rx.vstack(
-                    rx.icon("upload", size=20, color="rgba(255,255,255,0.15)"),
-                    rx.text(
-                        "Drop files here or click to browse",
-                        font_family="'DM Mono', monospace",
-                        font_size="0.72rem",
-                        color="rgba(255,255,255,0.3)",
-                    ),
-                    rx.text(
-                        "JPEG · PNG · GIF · MP4 · max 10 MB each · up to 4 files",
-                        font_family="'DM Mono', monospace",
-                        font_size="0.60rem",
-                        color="rgba(255,255,255,0.15)",
-                    ),
-                    spacing="2",
-                    align="center",
-                ),
-                id="media_upload",
-                multiple=True,
-                accept={
-                    "image/jpeg": [".jpg", ".jpeg"],
-                    "image/png": [".png"],
-                    "image/gif": [".gif"],
-                    "video/mp4": [".mp4"],
-                },
-                border="1px dashed rgba(255,255,255,0.1)",
-                padding="2em",
-                border_radius="12px",
-                background="rgba(255,255,255,0.01)",
-                _hover={
-                    "border_color": "rgba(255,255,255,0.2)",
-                    "background": "rgba(255,255,255,0.02)",
-                },
-                width="100%",
-                on_drop=DashboardState.handle_upload(
-                    rx.upload_files(upload_id="media_upload")),
-            ),
-            # File list — rendered below the upload box once files are selected
-            rx.cond(
-                DashboardState.media_files.length() > 0,
-                rx.vstack(
+            slabel("// schedule post"),
+            rx.hstack(
+                rx.link(
                     rx.hstack(
+                        rx.icon("arrow-left", size=11,
+                                color="rgba(255,255,255,0.5)"),
+                        rx.text("Home", font_family="'DM Mono', monospace",
+                                font_size="0.9rem", color="rgba(255,255,255,0.5)"),
+                        spacing="2", align="center",
+                    ),
+                    href="/", text_decoration="none",
+                    _hover={"opacity": "0.7"}, transition="opacity 0.15s",
+                ),
+                height="100%", spacing="1", align="start", width="100%",
+            ),
+            rx.html(
+                '<h2 style="font-family:Syne,sans-serif;font-size:1.6rem;font-weight:800;color:white;margin:0 0 0.1em 0;letter-spacing:-0.02em">Schedule a Post</h2>'
+            ),
+            rx.text(
+                "Set platforms, write content, pick a time. Leave time blank to post immediately.",
+                font_family="'DM Sans', sans-serif",
+                font_size="0.82rem",
+                color="rgba(255,255,255,0.27)",
+                margin_bottom="1em",
+            ),
+            rx.vstack(
+                flabel("Content"), content_area(), spacing="2", width="100%", align="start"
+            ),
+            rx.vstack(
+                flabel("Platforms"), prow(), spacing="2", width="100%", align="start"
+            ),
+            rx.vstack(
+                flabel("Scheduled Time (ISO 8601 — optional)"),
+                date_picker(
+                    selected=DashboardState.scheduled_time,
+                    on_change=DashboardState.set_scheduled_time,
+                    **input_style()
+                ),
+                spacing="2",
+                width="100%",
+                align="start",
+            ),
+            rx.vstack(
+                flabel("Media (optional — up to 4 files)"),
+                rx.upload(
+                    rx.vstack(
+                        rx.icon("upload", size=20,
+                                color="rgba(255,255,255,0.15)"),
                         rx.text(
-                            DashboardState.media_files.length().to_string() + " file(s) selected",
+                            "Drop files here or click to browse",
                             font_family="'DM Mono', monospace",
-                            font_size="0.63rem",
-                            color="rgba(255,255,255,0.35)",
+                            font_size="0.72rem",
+                            color="rgba(255,255,255,0.3)",
                         ),
-                        rx.spacer(),
-                        rx.hstack(
-                            rx.icon("trash-2", size=11,
-                                    color="rgba(255,80,80,0.65)"),
-                            rx.text(
-                                "clear all",
-                                font_family="'DM Mono', monospace",
-                                font_size="0.62rem",
-                                color="rgba(255,80,80,0.65)",
-                            ),
-                            spacing="1",
-                            align="center",
-                            cursor="pointer",
-                            on_click=DashboardState.set_media_files([]),
-                            _hover={"opacity": "0.7"},
+                        rx.text(
+                            "JPEG · PNG · GIF · MP4 · max 10 MB each · up to 4 files",
+                            font_family="'DM Mono', monospace",
+                            font_size="0.60rem",
+                            color="rgba(255,255,255,0.15)",
                         ),
-                        width="100%",
+                        spacing="2",
                         align="center",
                     ),
-                    rx.foreach(
-                        DashboardState.media_files,
-                        lambda f: rx.hstack(
-                            rx.icon("file-check", size=12, color="#00FFB2"),
-                            rx.text(
-                                f[0],
-                                font_family="'DM Mono', monospace",
-                                font_size="0.65rem",
-                                color="#00FFB2",
-                                overflow="hidden",
-                                text_overflow="ellipsis",
-                                white_space="nowrap",
-                            ),
-                            spacing="2",
-                            align="center",
-                            padding="0.35em 0.8em",
-                            background="rgba(0,255,178,0.04)",
-                            border="1px solid rgba(0,255,178,0.15)",
-                            border_radius="6px",
-                            width="100%",
-                            overflow="hidden",
-                        ),
-                    ),
-                    gap="0.5em",
-                    width="100%",
-                    padding="0.75em",
+                    id="media_upload",
+                    multiple=True,
+                    accept={
+                        "image/jpeg": [".jpg", ".jpeg"],
+                        "image/png": [".png"],
+                        "image/gif": [".gif"],
+                        "video/mp4": [".mp4"],
+                    },
+                    border="1px dashed rgba(255,255,255,0.1)",
+                    padding="2em",
+                    border_radius="12px",
                     background="rgba(255,255,255,0.01)",
-                    border="1px solid rgba(255,255,255,0.05)",
-                    border_radius="10px",
+                    _hover={
+                        "border_color": "rgba(255,255,255,0.2)",
+                        "background": "rgba(255,255,255,0.02)",
+                    },
+                    width="100%",
+                    on_drop=DashboardState.handle_upload(
+                        rx.upload_files(upload_id="media_upload")),
                 ),
+                # File list — rendered below the upload box once files are selected
+                rx.cond(
+                    DashboardState.media_files.length() > 0,
+                    rx.vstack(
+                        rx.hstack(
+                            rx.text(
+                                DashboardState.media_files.length().to_string() + " file(s) selected",
+                                font_family="'DM Mono', monospace",
+                                font_size="0.63rem",
+                                color="rgba(255,255,255,0.35)",
+                            ),
+                            rx.spacer(),
+                            rx.hstack(
+                                rx.icon("trash-2", size=11,
+                                        color="rgba(255,80,80,0.65)"),
+                                rx.text(
+                                    "clear all",
+                                    font_family="'DM Mono', monospace",
+                                    font_size="0.62rem",
+                                    color="rgba(255,80,80,0.65)",
+                                ),
+                                spacing="1",
+                                align="center",
+                                cursor="pointer",
+                                on_click=DashboardState.set_media_files([]),
+                                _hover={"opacity": "0.7"},
+                            ),
+                            width="100%",
+                            align="center",
+                        ),
+                        rx.foreach(
+                            DashboardState.media_files,
+                            lambda f: rx.hstack(
+                                rx.icon("file-check", size=12,
+                                        color="#00FFB2"),
+                                rx.text(
+                                    f[0],
+                                    font_family="'DM Mono', monospace",
+                                    font_size="0.65rem",
+                                    color="#00FFB2",
+                                    overflow="hidden",
+                                    text_overflow="ellipsis",
+                                    white_space="nowrap",
+                                ),
+                                spacing="2",
+                                align="center",
+                                padding="0.35em 0.8em",
+                                background="rgba(0,255,178,0.04)",
+                                border="1px solid rgba(0,255,178,0.15)",
+                                border_radius="6px",
+                                width="100%",
+                                overflow="hidden",
+                            ),
+                        ),
+                        gap="0.5em",
+                        width="100%",
+                        padding="0.75em",
+                        background="rgba(255,255,255,0.01)",
+                        border="1px solid rgba(255,255,255,0.05)",
+                        border_radius="10px",
+                    ),
+                ),
+                spacing="2",
+                width="100%",
+                align="start",
             ),
-            spacing="2",
-            width="100%",
+            post_btn("Schedule Post →"),
+            spacing="5",
             align="start",
+            width="55%",
         ),
-        post_btn("Schedule Post →"),
-
-        spacing="5",
+        rx.box(
+            platform_previews_panel(),
+            min_width="320px",
+            max_width="400px",
+            width="45%",
+            position="sticky",
+            top="1.5em",
+            align_self="start",
+        ),
+        width="100%",
         align="start",
-        width="55%",
+        gap="4em"
     )
 
 
 def post_now_tab() -> rx.Component:
-    return rx.vstack(
-        slabel("// post now"),
-        rx.hstack(
-            rx.link(
-                rx.hstack(
-                    rx.icon("arrow-left", size=11,
-                            color="rgba(255,255,255,0.5)"),
-                    rx.text("Home", font_family="'DM Mono', monospace",
-                            font_size="0.9rem", color="rgba(255,255,255,0.5)"),
-                    spacing="2", align="center",
-                ),
-                href="/", text_decoration="none",
-                _hover={"opacity": "0.7"}, transition="opacity 0.15s",
-            ),
-            height="100%", spacing="1", align="start", width="100%",
-        ),
-        rx.html(
-            '<h2 style="font-family:Syne,sans-serif;font-size:1.6rem;font-weight:800;color:white;margin:0 0 0.1em 0;letter-spacing:-0.02em">Post Immediately</h2>'
-        ),
-        rx.text(
-            "No scheduling. Fires the moment you hit post.",
-            font_family="'DM Sans', sans-serif",
-            font_size="0.82rem",
-            color="rgba(255,255,255,0.27)",
-            margin_bottom="1.5em",
-        ),
+    return rx.hstack(
         rx.vstack(
-            flabel("Content"), content_area(), spacing="2", width="100%", align="start"
-        ),
-        rx.vstack(
-            flabel("Platforms"), prow(), spacing="2", width="100%", align="start"
-        ),
-        rx.vstack(
-            flabel("Media (optional — up to 4 files)"),
-            rx.upload(
-                rx.vstack(
-                    rx.icon("upload", size=20, color="rgba(255,255,255,0.15)"),
-                    rx.text(
-                        "Drop files here or click to browse",
-                        font_family="'DM Mono', monospace",
-                        font_size="0.72rem",
-                        color="rgba(255,255,255,0.3)",
-                    ),
-                    rx.text(
-                        "JPEG · PNG · GIF · MP4 · max 10 MB each · up to 4 files",
-                        font_family="'DM Mono', monospace",
-                        font_size="0.60rem",
-                        color="rgba(255,255,255,0.15)",
-                    ),
-                    spacing="2",
-                    align="center",
-                ),
-                id="media_upload_now",
-                multiple=True,
-                accept={
-                    "image/jpeg": [".jpg", ".jpeg"],
-                    "image/png": [".png"],
-                    "image/gif": [".gif"],
-                    "video/mp4": [".mp4"],
-                },
-                border="1px dashed rgba(255,255,255,0.1)",
-                padding="2em",
-                border_radius="12px",
-                background="rgba(255,255,255,0.01)",
-                _hover={
-                    "border_color": "rgba(255,255,255,0.2)",
-                    "background": "rgba(255,255,255,0.02)",
-                },
-                width="100%",
-                on_drop=DashboardState.handle_upload(
-                    rx.upload_files(upload_id="media_upload_now")),
-            ),
-            rx.cond(
-                DashboardState.media_files.length() > 0,
-                rx.vstack(
+            slabel("// post now"),
+            rx.hstack(
+                rx.link(
                     rx.hstack(
+                        rx.icon("arrow-left", size=11,
+                                color="rgba(255,255,255,0.5)"),
+                        rx.text("Home", font_family="'DM Mono', monospace",
+                                font_size="0.9rem", color="rgba(255,255,255,0.5)"),
+                        spacing="2", align="center",
+                    ),
+                    href="/", text_decoration="none",
+                    _hover={"opacity": "0.7"}, transition="opacity 0.15s",
+                ),
+                height="100%", spacing="1", align="start", width="100%",
+            ),
+            rx.html(
+                '<h2 style="font-family:Syne,sans-serif;font-size:1.6rem;font-weight:800;color:white;margin:0 0 0.1em 0;letter-spacing:-0.02em">Post Immediately</h2>'
+            ),
+            rx.text(
+                "No scheduling. Fires the moment you hit post.",
+                font_family="'DM Sans', sans-serif",
+                font_size="0.82rem",
+                color="rgba(255,255,255,0.27)",
+                margin_bottom="1.5em",
+            ),
+            rx.vstack(
+                flabel("Content"), content_area(), spacing="2", width="100%", align="start"
+            ),
+            rx.vstack(
+                flabel("Platforms"), prow(), spacing="2", width="100%", align="start"
+            ),
+            rx.vstack(
+                flabel("Media (optional — up to 4 files)"),
+                rx.upload(
+                    rx.vstack(
+                        rx.icon("upload", size=20,
+                                color="rgba(255,255,255,0.15)"),
                         rx.text(
-                            DashboardState.media_files.length().to_string() + " file(s) selected",
+                            "Drop files here or click to browse",
                             font_family="'DM Mono', monospace",
-                            font_size="0.63rem",
-                            color="rgba(255,255,255,0.35)",
+                            font_size="0.72rem",
+                            color="rgba(255,255,255,0.3)",
                         ),
-                        rx.spacer(),
-                        rx.hstack(
-                            rx.icon("trash-2", size=11,
-                                    color="rgba(255,80,80,0.65)"),
-                            rx.text(
-                                "clear all",
-                                font_family="'DM Mono', monospace",
-                                font_size="0.62rem",
-                                color="rgba(255,80,80,0.65)",
-                            ),
-                            spacing="1",
-                            align="center",
-                            cursor="pointer",
-                            on_click=DashboardState.set_media_files([]),
-                            _hover={"opacity": "0.7"},
+                        rx.text(
+                            "JPEG · PNG · GIF · MP4 · max 10 MB each · up to 4 files",
+                            font_family="'DM Mono', monospace",
+                            font_size="0.60rem",
+                            color="rgba(255,255,255,0.15)",
                         ),
-                        width="100%",
+                        spacing="2",
                         align="center",
                     ),
-                    rx.foreach(
-                        DashboardState.media_files,
-                        lambda f: rx.hstack(
-                            rx.icon("file-check", size=12, color="#00FFB2"),
-                            rx.text(
-                                f[0],
-                                font_family="'DM Mono', monospace",
-                                font_size="0.65rem",
-                                color="#00FFB2",
-                                overflow="hidden",
-                                text_overflow="ellipsis",
-                                white_space="nowrap",
-                            ),
-                            spacing="2",
-                            align="center",
-                            padding="0.35em 0.8em",
-                            background="rgba(0,255,178,0.04)",
-                            border="1px solid rgba(0,255,178,0.15)",
-                            border_radius="6px",
-                            width="100%",
-                            overflow="hidden",
-                        ),
-                    ),
-                    gap="0.5em",
-                    width="100%",
-                    padding="0.75em",
+                    id="media_upload_now",
+                    multiple=True,
+                    accept={
+                        "image/jpeg": [".jpg", ".jpeg"],
+                        "image/png": [".png"],
+                        "image/gif": [".gif"],
+                        "video/mp4": [".mp4"],
+                    },
+                    border="1px dashed rgba(255,255,255,0.1)",
+                    padding="2em",
+                    border_radius="12px",
                     background="rgba(255,255,255,0.01)",
-                    border="1px solid rgba(255,255,255,0.05)",
-                    border_radius="10px",
+                    _hover={
+                        "border_color": "rgba(255,255,255,0.2)",
+                        "background": "rgba(255,255,255,0.02)",
+                    },
+                    width="100%",
+                    on_drop=DashboardState.handle_upload(
+                        rx.upload_files(upload_id="media_upload_now")),
                 ),
+                rx.cond(
+                    DashboardState.media_files.length() > 0,
+                    rx.vstack(
+                        rx.hstack(
+                            rx.text(
+                                DashboardState.media_files.length().to_string() + " file(s) selected",
+                                font_family="'DM Mono', monospace",
+                                font_size="0.63rem",
+                                color="rgba(255,255,255,0.35)",
+                            ),
+                            rx.spacer(),
+                            rx.hstack(
+                                rx.icon("trash-2", size=11,
+                                        color="rgba(255,80,80,0.65)"),
+                                rx.text(
+                                    "clear all",
+                                    font_family="'DM Mono', monospace",
+                                    font_size="0.62rem",
+                                    color="rgba(255,80,80,0.65)",
+                                ),
+                                spacing="1",
+                                align="center",
+                                cursor="pointer",
+                                on_click=DashboardState.set_media_files([]),
+                                _hover={"opacity": "0.7"},
+                            ),
+                            width="100%",
+                            align="center",
+                        ),
+                        rx.foreach(
+                            DashboardState.media_files,
+                            lambda f: rx.hstack(
+                                rx.icon("file-check", size=12,
+                                        color="#00FFB2"),
+                                rx.text(
+                                    f[0],
+                                    font_family="'DM Mono', monospace",
+                                    font_size="0.65rem",
+                                    color="#00FFB2",
+                                    overflow="hidden",
+                                    text_overflow="ellipsis",
+                                    white_space="nowrap",
+                                ),
+                                spacing="2",
+                                align="center",
+                                padding="0.35em 0.8em",
+                                background="rgba(0,255,178,0.04)",
+                                border="1px solid rgba(0,255,178,0.15)",
+                                border_radius="6px",
+                                width="100%",
+                                overflow="hidden",
+                            ),
+                        ),
+                        gap="0.5em",
+                        width="100%",
+                        padding="0.75em",
+                        background="rgba(255,255,255,0.01)",
+                        border="1px solid rgba(255,255,255,0.05)",
+                        border_radius="10px",
+                    ),
+                ),
+                spacing="2",
+                width="100%",
+                align="start",
             ),
-            spacing="2",
-            width="100%",
+            post_btn("Post Now →"),
+            spacing="5",
             align="start",
+            width="55%",
         ),
-        post_btn("Post Now →"),
-        spacing="5",
+        rx.box(
+            platform_previews_panel(),
+            min_width="320px",
+            max_width="400px",
+            width="45%",
+            position="sticky",
+            top="1.5em",
+            align_self="start",
+        ),
+        width="100%",
         align="start",
-        width="55%",
+        gap="4em"
     )
 
 
@@ -431,7 +463,8 @@ def history_tab() -> rx.Component:
                                         color="rgba(255,255,255,0.1)",
                                     ),
                                     rx.text(
-                                        rx.cond(post.scheduled_time, "Scheduled: " + post.scheduled_time, "Posted immediately"),
+                                        rx.cond(
+                                            post.scheduled_time, "Scheduled: " + post.scheduled_time, "Posted immediately"),
                                         font_family="'DM Mono', monospace",
                                         font_size="0.6rem",
                                         color="rgba(255,255,255,0.3)",
@@ -543,7 +576,7 @@ def unschedule_tab() -> rx.Component:
             flabel("Select Post"),
             custom_select(
                 options=DashboardState.post_select_options,
-                value=DashboardState.delete_post_id,
+                value=DashboardState.delete_post_content,
                 on_change=DashboardState.set_delete_post_from_option,
                 placeholder="Pick a post to unschedule...",
                 width="100%",

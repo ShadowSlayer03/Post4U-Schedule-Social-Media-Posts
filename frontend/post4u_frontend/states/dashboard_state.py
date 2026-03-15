@@ -1,8 +1,10 @@
 from datetime import datetime
 import os
+import re
 import reflex as rx
 import httpx
 import pytz
+from bs4 import BeautifulSoup
 from tzlocal import get_localzone
 from pydantic import BaseModel
 from typing import Optional
@@ -26,6 +28,10 @@ class PostRecord(BaseModel):
     created_at: str
     scheduled_time: Optional[str] = None
 
+class CharLimits(BaseModel):
+    platform: str
+    is_over: bool
+
 
 class DashboardState(rx.State):
     active_tab: str = "schedule"
@@ -37,6 +43,18 @@ class DashboardState(rx.State):
     is_posting: bool = False
     is_refreshing: bool = False
     delete_post_id: str = ""
+    delete_post_content: str = ""
+
+    og_title: str = ""
+    og_image: str = ""
+    og_description: str = ""
+    og_url: str = ""
+    is_fetching_og: bool = False
+
+    # Constant but can be changed acc to platform capabilities
+    limits = {"x": 280, "reddit": 40000, "telegram": 4096, "discord": 2000}
+
+    _MAX_RESPONSE_BYTES = 512_000
 
     @rx.var
     def post_select_options(self) -> list[str]:
@@ -45,6 +63,21 @@ class DashboardState(rx.State):
             f"{p.id} | {p.content[:40]}"
             for p in self.posts
         ]
+    
+    @rx.var
+    def char_limits(self) -> list[CharLimits]:
+        results = []
+        content_len = len(self.content)
+        for p in self.platforms:
+            limit = self.limits.get(p, 2000)
+            results.append(CharLimits(platform=p, is_over=content_len > limit))
+        return results
+    
+    @rx.var
+    def max_characters(self) -> int:
+        if not self.platforms:
+            return 2000
+        return min([self.limits.get(p, 2000) for p in self.platforms])
 
     @rx.event
     def set_tab(self, tab: str):
@@ -64,6 +97,107 @@ class DashboardState(rx.State):
     @rx.event
     def set_content(self, val: str):
         self.content = val
+        
+        urls = re.findall(r'https?://[^\s{}()<>]+(?:[^\s{}()<>\[\]]|\([^\s{}()<>\[\]]*\))', val)
+        if urls:
+            first_url = urls[0].rstrip('.,!?;:')
+            if first_url != self.og_url:
+                return DashboardState.fetch_og_preview(first_url)
+        elif self.og_url:
+            self.og_title = ""
+            self.og_image = ""
+            self.og_description = ""
+            self.og_url = ""
+        return
+
+    def _is_safe_url(self, url: str) -> tuple[bool, str]:
+        try:
+            from urllib.parse import urlparse
+            stripped_url = url.strip()
+            parsed = urlparse(stripped_url)
+
+            if parsed.scheme != "https":
+                return False, "Only HTTPS URLs are allowed."
+
+            hostname = parsed.hostname
+            if not hostname:
+                return False, "URL has no hostname."
+
+            return True, ""
+        except Exception as e:
+            return False, f"URL validation error: {e}"
+
+    @rx.event(background=True)
+    async def fetch_og_preview(self, url: str):
+        async with self as state:
+            state.og_url = url
+            state.is_fetching_og = True
+            state.og_title = ""
+            state.og_image = ""
+            state.og_description = ""
+
+        try:
+            cleaned_url = url.strip()
+
+            is_safe, reason = self._is_safe_url(cleaned_url)
+            if not is_safe:
+                yield rx.toast.warning(f"Blocked link preview: {reason}", duration=5000)
+                return
+
+            async with httpx.AsyncClient(
+                timeout=5.0,
+                follow_redirects=False,
+            ) as client:
+                response = await client.get(
+                    cleaned_url,
+                    headers={"User-Agent": "Mozilla/5.0 (compatible; Post4U/1.0; +https://post4u.app)"},
+                )
+
+                if response.status_code in (301, 302, 303, 307, 308):
+                    redirect_url = response.headers.get("location", "")
+                    if redirect_url:
+                        is_safe, reason = self._is_safe_url(redirect_url)
+                        if not is_safe:
+                            yield rx.toast.warning(f"Blocked redirect to unsafe URL ({reason}): {redirect_url}", duration=5000)
+                            return
+                        response = await client.get(
+                            redirect_url,
+                            headers={"User-Agent": "Mozilla/5.0 (compatible; Post4U/1.0; +https://post4u.app)"},
+                        )
+
+                if response.status_code != 200:
+                    return
+
+                content_type = response.headers.get("content-type", "")
+                if "text/html" not in content_type:
+                    yield rx.toast.warning(f"Skipping non-HTML response: {content_type}", duration=5000)
+                    return
+
+                raw_bytes = b""
+                async for chunk in response.aiter_bytes(chunk_size=8192):
+                    raw_bytes += chunk
+                    if len(raw_bytes) >= self._MAX_RESPONSE_BYTES:
+                        break
+
+                soup = BeautifulSoup(raw_bytes, "html.parser")
+
+                og_title_tag = soup.find("meta", property="og:title")
+                og_image_tag = soup.find("meta", property="og:image")
+                og_description_tag = soup.find("meta", property="og:description")
+
+                title = soup.title.string.strip() if soup.title and soup.title.string else ""
+                description_tag = soup.find("meta", attrs={"name": "description"})
+
+                async with self as state:
+                    state.og_title = og_title_tag["content"] if og_title_tag else (title or "")
+                    state.og_image = og_image_tag["content"] if og_image_tag else ""
+                    state.og_description = og_description_tag["content"] if og_description_tag else (description_tag["content"] if description_tag else "")
+
+        except Exception as e:
+            yield rx.toast.warning(f"Error fetching link preview: {e}", duration=5000)
+        finally:
+            async with self as state:
+                state.is_fetching_og = False
 
     @rx.event
     def set_scheduled_time(self, val: str):
@@ -77,6 +211,7 @@ class DashboardState(rx.State):
     def set_delete_post_from_option(self, val: str):
         """Parses 'content[:40] | scheduled_time' and stores just the id."""
         self.delete_post_id = val.split(" | ")[0] if " | " in val else val
+        self.delete_post_content = val.split(" | ")[1] if " | " in val else ""
 
     @rx.event
     def clear_form(self):
@@ -140,6 +275,11 @@ class DashboardState(rx.State):
         if not self.platforms:
             yield rx.toast.warning("Pick at least one platform.", duration=5000)
             return
+        
+        for c in self.char_limits:
+            if c["is_over"]:
+                yield rx.toast.warning(f"Content exceeds character limit for {c['platform']}.", duration=5000)
+                return
 
         utc_iso = None
         if self.scheduled_time:
@@ -235,7 +375,6 @@ class DashboardState(rx.State):
                     self.delete_post_id = ""
                     yield DashboardState.load_posts
                 else:
-                    print(r)
                     yield rx.toast.error(f"Error: {r.text}", duration=5000)
 
         except Exception as e:
