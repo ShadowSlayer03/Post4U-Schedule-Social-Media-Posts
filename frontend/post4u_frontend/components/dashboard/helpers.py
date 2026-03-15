@@ -27,15 +27,44 @@ def input_style() -> dict:
 
 
 def content_area() -> rx.Component:
-    return rx.text_area(
-        placeholder="What are you shipping today?",
-        value=DashboardState.content, on_change=DashboardState.set_content,
-        font_family="'DM Sans', sans-serif", font_size="0.86rem", color="white",
-        background="rgba(255,255,255,0.025)", border="1px solid rgba(255,255,255,0.07)",
-        border_radius="10px", padding="1em", min_height="120px", resize="vertical", width="100%",
-        _placeholder={"color": "rgba(255,255,255,0.17)"},
-        _focus={"border_color": "rgba(0,255,178,0.26)", "outline": "none",
-                "box_shadow": "0 0 0 3px rgba(0,255,178,0.05)"},
+    return rx.vstack(
+        rx.text_area(
+            placeholder="What are you shipping today?",
+            value=DashboardState.content,
+            on_change=DashboardState.set_content,
+            font_family="'DM Sans', sans-serif", font_size="0.86rem", color="white",
+            background="rgba(255,255,255,0.025)", border="1px solid rgba(255,255,255,0.07)",
+            border_radius="10px", padding="1em", min_height="120px", resize="vertical", width="100%",
+            _placeholder={"color": "rgba(255,255,255,0.17)"},
+            _focus={"border_color": "rgba(0,255,178,0.26)", "outline": "none",
+                    "box_shadow": "0 0 0 3px rgba(0,255,178,0.05)"}
+        ),
+        rx.hstack(
+            rx.foreach(
+                DashboardState.char_limits,
+                lambda info: rx.cond(
+                    info["is_over"],
+                    rx.text(
+                        info["platform"].upper() + " limit exceeded!",
+                        color="#FF4D4D", font_size="0.65rem", font_family="'DM Mono', monospace"
+                    ),
+                    None
+                )
+            ),
+            rx.spacer(),
+            rx.text(
+                f"{DashboardState.content.length()} / {DashboardState.max_characters} chars",
+                font_family="'DM Mono', monospace",
+                font_size="0.67rem",
+                color=rx.cond(
+                    DashboardState.content.length() > DashboardState.max_characters,
+                    "#FF4D4D",
+                    "rgba(255,255,255,0.3)"
+                )
+            ),
+            width="100%", align="center", margin_top="0.3em"
+        ),
+        width="100%", align="end"
     )
 
 
