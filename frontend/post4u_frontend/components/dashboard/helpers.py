@@ -40,12 +40,13 @@ def content_area() -> rx.Component:
                     "box_shadow": "0 0 0 3px rgba(0,255,178,0.05)"}
         ),
         rx.hstack(
+            rx.text("Char limit exceeded for: ", font_family="'DM Mono', monospace", font_size="0.67rem", color="rgba(255,255,255,0.3)"),
             rx.foreach(
                 DashboardState.char_limits,
                 lambda info: rx.cond(
                     info["is_over"],
                     rx.text(
-                        info["platform"].upper() + " limit exceeded!",
+                        info["platform"].capitalize(),
                         color="#FF4D4D", font_size="0.65rem", font_family="'DM Mono', monospace"
                     ),
                     None
