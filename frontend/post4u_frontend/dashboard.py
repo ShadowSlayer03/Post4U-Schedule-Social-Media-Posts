@@ -4,6 +4,7 @@ from .components.dashboard.sidebar import sidebar
 from .components.dashboard.tabs import (
     schedule_tab,
     post_now_tab,
+    edit_tab,
     history_tab,
     unschedule_tab,
 )
@@ -95,6 +96,7 @@ def dashboard() -> rx.Component:
                             for t, k in [
                                 ("Sched", "schedule"),
                                 ("Now", "post_now"),
+                                ("Edit", "edit_post"),
                                 ("Hist", "history"),
                                 ("Unsch", "unschedule"),
                             ]
@@ -116,9 +118,13 @@ def dashboard() -> rx.Component:
                         DashboardState.active_tab == "post_now",
                         post_now_tab(),
                         rx.cond(
-                            DashboardState.active_tab == "unschedule",
-                            unschedule_tab(),
-                            history_tab(),
+                            DashboardState.active_tab == "edit_post",
+                            edit_tab(),
+                            rx.cond(
+                                DashboardState.active_tab == "unschedule",
+                                unschedule_tab(),
+                                history_tab(),
+                            ),
                         ),
                     ),
                 ),
