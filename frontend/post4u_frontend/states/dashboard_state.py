@@ -241,8 +241,6 @@ class DashboardState(rx.State):
                 self.edit_post_platforms = list(post.platforms)
                 self.edit_post_scheduled_time = post.scheduled_time
                 self.edit_post_media_files = post.media_paths if hasattr(post, "media_paths") else []
-
-                print("Media files for edit:", self.edit_post_media_files)
         return
 
     @rx.event
@@ -375,10 +373,12 @@ class DashboardState(rx.State):
             api_key = os.getenv("POST4U_API_KEY")
 
             async with httpx.AsyncClient() as client:
+                backend_url = os.getenv("BACKEND_URL")
+
                 if is_edit:
-                    url = f"http://localhost:8000/posts/{self.edit_post_id}/"
+                    url = f"{backend_url}/posts/{self.edit_post_id}/"
                 else:
-                    url = "http://localhost:8000/posts/"
+                    url = f"{backend_url}/posts/"
                 
                 if is_edit:
                     r = await client.put(
@@ -423,7 +423,9 @@ class DashboardState(rx.State):
         try:
             async with httpx.AsyncClient() as client:
                 api_key = os.getenv("POST4U_API_KEY")
-                r = await client.get("http://localhost:8000/posts/", timeout=10,
+                backend_url = os.getenv("BACKEND_URL")
+
+                r = await client.get(f"{backend_url}/posts/", timeout=10,
                                      headers={
                                          "X-API-Key": api_key
                                      })
@@ -450,8 +452,10 @@ class DashboardState(rx.State):
         try:
             async with httpx.AsyncClient() as client:
                 api_key = os.getenv("POST4U_API_KEY")
+                backend_url = os.getenv("BACKEND_URL")
+
                 r = await client.post(
-                    f"http://localhost:8000/posts/{self.delete_post_id}/unschedule/",
+                    f"{backend_url}/posts/{self.delete_post_id}/unschedule/",
                     timeout=10,
                     headers={
                         "X-API-Key": api_key
