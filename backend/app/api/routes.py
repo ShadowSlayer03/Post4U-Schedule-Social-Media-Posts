@@ -105,3 +105,38 @@ async def unschedule_post(id: str):
     if success:
         return { "message": "Post unscheduled", "post_id": id, "status_code": 200 }
     return { "message": "Post not found or not scheduled", "post_id": id, "status_code": 404 }
+
+# Edit a post (only if not yet published)
+@router.put("/posts/{id}/")
+async def edit_post(id: str, content: str = Form(...), platforms: str = Form(...), scheduled_time: str = Form(None)):
+    post = await Post.get(id)
+    if post is None:
+        return { "message": "Post not found", "post_id": id, "status_code": 404 }
+    
+    if post.status:
+        return { "message": "Cannot edit a post that has already been published", "post_id": id, "status_code": 400 }
+
+    platform_list = [p.strip().lower() for p in platforms.split(",")]
+    invalid_platforms = set(platform_list) - ALLOWED_PLATFORMS
+    if invalid_platforms:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Unknown platform(s): {', '.join(invalid_platforms)}. Allowed: {', '.join(ALLOWED_PLATFORMS)}"
+        )
+
+    post.content = content
+    post.platforms = platform_list
+    post.scheduled_time = datetime.fromisoformat(scheduled_time) if scheduled_time else None
+    await post.save()
+
+    if post.scheduled_time and post.scheduled_time > datetime.now(timezone.utc):
+        job_id = await scheduler_service.schedule_post(str(post.id), post.scheduled_time)
+        return { "message": "Post updated and scheduled", "post_id": str(post.id), "job_id": job_id, "status_code": 200 }
+
+    results = {}
+    for platform in post.platforms:
+        results[platform] = await publish_to_platform(platform, post.content, post.media_paths)
+
+    post.status = results
+    await post.save()
+    return { "message": "Post updated and published", "post_id": str(post.id), "results": results, "status_code": 200 }

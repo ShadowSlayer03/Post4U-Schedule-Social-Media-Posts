@@ -2,8 +2,8 @@
 from fastapi import HTTPException, status
 import magic
 
-MAX_UPLOAD_SIZE = 10 * 1024 * 1024  
-ALLOWED_MIME_TYPES = {"image/jpeg", "image/png", "image/gif", "video/mp4", "video/quicktime", "video/x-msvideo"}
+MAX_UPLOAD_SIZE = 20 * 1024 * 1024  
+ALLOWED_MIME_TYPES = {"image/jpeg", "image/png", "image/gif", "video/mp4", "video/quicktime", "video/x-msvideo", "application/octet-stream"}
 
 async def check_files(files):
     validated_files = []

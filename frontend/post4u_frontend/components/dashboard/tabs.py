@@ -493,10 +493,11 @@ def history_tab() -> rx.Component:
                                 rx.icon("clock", size=10,
                                         color="rgba(255,255,255,0.2)"),
                                 rx.text(
-                                    "Created: " + post.get("created_at", ""),
+                                    "Created: " +
+                                    post.get("created_at", "") + " UTC",
                                     font_family="'DM Mono', monospace",
                                     font_size="0.55rem",
-                                    color="rgba(255,255,255,0.2)",
+                                    color="rgba(255,255,255,0.3)",
                                 ),
                                 spacing="2",
                                 align="center",
@@ -603,5 +604,417 @@ def unschedule_tab() -> rx.Component:
         spacing="5",
         align="start",
         width="55%",
+        on_mount=DashboardState.load_posts,
+    )
+
+
+def _edit_ptoggle(icon_name: str, label: str, pid: str, color: str) -> rx.Component:
+    """Platform toggle for the Edit Post inside platform row."""
+    s = DashboardState.edit_post_platforms.contains(pid)
+    return rx.box(
+        rx.hstack(
+            rx.icon(icon_name, size=13, color=rx.cond(s, color, "rgba(255,255,255,0.26)")),
+            rx.text(label, font_family="'DM Mono', monospace", font_size="0.72rem",
+                    color=rx.cond(s, "white", "rgba(255,255,255,0.3)"), letter_spacing="0.04em"),
+            spacing="2", align="center",
+        ),
+        padding_x="0.95em", padding_y="0.52em", border_radius="8px",
+        background=rx.cond(s, "rgba(0,255,178,0.06)", "rgba(255,255,255,0.02)"),
+        border=rx.cond(s, "1px solid rgba(0,255,178,0.2)", "1px solid rgba(255,255,255,0.07)"),
+        cursor="pointer", on_click=DashboardState.toggle_edit_platform(pid),
+        _hover={"border_color": "rgba(0,255,178,0.2)"}, transition="all 0.15s ease",
+    )
+
+
+def _edit_prow() -> rx.Component:
+    """Platform row for the Edit Post tab."""
+    return rx.hstack(
+        _edit_ptoggle("twitter", "X", "x", "#1DA1F2"),
+        _edit_ptoggle("message-circle", "Reddit", "reddit", "#FF4500"),
+        _edit_ptoggle("send", "Telegram", "telegram", "#229ED9"),
+        _edit_ptoggle("hash", "Discord", "discord", "#5865F2"),
+        spacing="3", flex_wrap="wrap",
+    )
+
+
+def _post_tile_for_edit(post) -> rx.Component:
+    """History-style tile with an Edit button overlay."""
+    return rx.box(
+        rx.vstack(
+            rx.hstack(
+                rx.hstack(
+                    rx.foreach(
+                        ["x", "reddit", "telegram", "discord"],
+                        lambda plat: rx.cond(
+                            post["status"].get(plat),
+                            rx.box(
+                                rx.text(
+                                    plat.upper(),
+                                    font_family="'DM Mono', monospace",
+                                    font_size="0.55rem",
+                                    font_weight="700",
+                                    color=rx.cond(
+                                        post["status"].get(plat, {}).get("status") == "success",
+                                        "#00FFB2",
+                                        "rgba(255,180,0,0.85)",
+                                    ),
+                                ),
+                                padding_x="0.6em",
+                                padding_y="0.2em",
+                                background=rx.cond(
+                                    post["status"].get(plat, {}).get("status") == "success",
+                                    "rgba(0,255,178,0.05)",
+                                    "rgba(255,180,0,0.05)",
+                                ),
+                                border=rx.cond(
+                                    post["status"].get(plat, {}).get("status") == "success",
+                                    "1px solid rgba(0,255,178,0.15)",
+                                    "1px solid rgba(255,180,0,0.15)",
+                                ),
+                                border_radius="4px",
+                            ),
+                        )
+                    ),
+                    spacing="2",
+                ),
+                rx.spacer(),
+                rx.vstack(
+                    rx.text(
+                        "ID: " + post.id,
+                        font_family="'DM Mono', monospace",
+                        font_size="0.55rem",
+                        color="rgba(255,255,255,0.1)",
+                    ),
+                    rx.text(
+                        rx.cond(post.scheduled_time, "Scheduled: " + post.scheduled_time, "Posted immediately"),
+                        font_family="'DM Mono', monospace",
+                        font_size="0.6rem",
+                        color="rgba(255,255,255,0.3)",
+                    ),
+                    align="end",
+                    spacing="0",
+                ),
+                width="100%",
+                align="center",
+            ),
+            rx.box(
+                rx.text(
+                    post["content"],
+                    font_family="'DM Sans', sans-serif",
+                    font_size="0.88rem",
+                    color="rgba(255,255,255,0.7)",
+                    line_height="1.6",
+                ),
+                width="100%",
+                padding_y="0.5em",
+            ),
+            rx.divider(border_color="rgba(255,255,255,0.03)"),
+            rx.hstack(
+                rx.hstack(
+                    rx.icon("clock", size=10, color="rgba(255,255,255,0.2)"),
+                    rx.text(
+                        "Created: " + post.get("created_at", "") + " UTC",
+                        font_family="'DM Mono', monospace",
+                        font_size="0.55rem",
+                        color="rgba(255,255,255,0.3)",
+                    ),
+                    spacing="2",
+                    align="center",
+                ),
+                rx.spacer(),
+                rx.hstack(
+                    rx.icon("pencil", size=11, color="rgba(0,255,178,0.7)"),
+                    rx.text(
+                        "Edit",
+                        font_family="'DM Mono', monospace",
+                        font_size="0.62rem",
+                        color="rgba(0,255,178,0.7)",
+                    ),
+                    spacing="1",
+                    align="center",
+                    padding_x="0.7em",
+                    padding_y="0.3em",
+                    border="1px solid rgba(0,255,178,0.2)",
+                    border_radius="6px",
+                    background="rgba(0,255,178,0.04)",
+                    cursor="pointer",
+                    _hover={"background": "rgba(0,255,178,0.1)", "border_color": "rgba(0,255,178,0.4)"},
+                    transition="all 0.15s ease",
+                    on_click=DashboardState.select_post_for_edit(post.id),
+                ),
+                width="100%",
+                align="center",
+            ),
+            spacing="3",
+            align="start",
+        ),
+        padding="1.5em",
+        background="rgba(255,255,255,0.01)",
+        border="1px solid rgba(255,255,255,0.04)",
+        border_radius="12px",
+        width="100%",
+        _hover={"border_color": "rgba(255,255,255,0.08)", "background": "rgba(255,255,255,0.015)"},
+        transition="all 0.2s ease",
+    )
+
+
+def edit_tab() -> rx.Component:
+    list_view = rx.vstack(
+        rx.vstack(
+            rx.text(
+                "Edit posts that are scheduled and not yet posted.",
+                font_family="'DM Sans', sans-serif",
+                font_size="0.82rem",
+                color="rgba(255,255,255,0.27)",
+            ),
+            gap="0.5em",
+            margin_bottom="1em",
+        ),
+        refresh_posts_btn(),
+        rx.cond(
+            DashboardState.posts_that_can_be_edited.length() == 0,
+            rx.box(
+                rx.vstack(
+                    rx.icon("inbox", size=26, color="rgba(255,255,255,0.08)"),
+                    rx.text(
+                        "No posts available for editing — click Refresh",
+                        font_family="'DM Mono', monospace",
+                        font_size="0.73rem",
+                        color="rgba(255,255,255,0.18)",
+                    ),
+                    spacing="3",
+                    align="center",
+                ),
+                width="100%",
+                padding_y="4em",
+                background="rgba(255,255,255,0.01)",
+                border="1px solid rgba(255,255,255,0.05)",
+                border_radius="12px",
+                display="flex",
+                align_items="center",
+                justify_content="center",
+            ),
+            rx.grid(
+                rx.foreach(DashboardState.posts_that_can_be_edited, _post_tile_for_edit),
+                spacing="4",
+                columns="2",
+                width="100%",
+            ),
+        ),
+        spacing="5",
+        align="start",
+        width="100%",
+    )
+
+    edit_form = rx.hstack(
+        rx.vstack(
+            rx.hstack(
+                rx.box(
+                    rx.hstack(
+                        rx.icon("arrow-left", size=11, color="rgba(0,255,178,0.7)"),
+                        rx.text(
+                            "Back to list",
+                            font_family="'DM Mono', monospace",
+                            font_size="0.72rem",
+                            color="rgba(0,255,178,0.7)",
+                        ),
+                        spacing="2", align="center",
+                    ),
+                    cursor="pointer",
+                    on_click=DashboardState.clear_edit_selection,
+                    _hover={"opacity": "0.7"},
+                    transition="opacity 0.15s",
+                ),
+                rx.spacer(),
+                rx.text(
+                    "ID: " + DashboardState.edit_post_id,
+                    font_family="'DM Mono', monospace",
+                    font_size="0.6rem",
+                    color="rgba(255,255,255,0.2)",
+                ),
+                width="100%",
+                align="center",
+            ),
+            rx.vstack(
+                flabel("Content"),
+                rx.text_area(
+                    placeholder="Edit your post content...",
+                    value=DashboardState.edit_post_content,
+                    on_change=DashboardState.set_edit_content,
+                    font_family="'DM Sans', sans-serif", font_size="0.86rem", color="white",
+                    background="rgba(255,255,255,0.025)", border="1px solid rgba(255,255,255,0.07)",
+                    border_radius="10px", padding="1em", min_height="120px", resize="vertical", width="100%",
+                    _placeholder={"color": "rgba(255,255,255,0.17)"},
+                    _focus={"border_color": "rgba(0,255,178,0.26)", "outline": "none",
+                            "box_shadow": "0 0 0 3px rgba(0,255,178,0.05)"},
+                ),
+                spacing="2", width="100%", align="start",
+            ),
+            rx.vstack(
+                flabel("Platforms"),
+                _edit_prow(),
+                spacing="2", width="100%", align="start",
+            ),
+            rx.vstack(
+                flabel("Scheduled Time"),
+                date_picker(
+                    selected=DashboardState.edit_post_scheduled_time,
+                    on_change=DashboardState.set_edit_scheduled_time,
+                    **input_style(),
+                ),
+                spacing="2", width="100%", align="start",
+            ),
+            rx.vstack(
+                flabel("Media (optional — up to 4 files)"),
+                rx.upload(
+                    rx.vstack(
+                        rx.icon("upload", size=20,
+                                color="rgba(255,255,255,0.15)"),
+                        rx.text(
+                            "Drop files here or click to browse",
+                            font_family="'DM Mono', monospace",
+                            font_size="0.72rem",
+                            color="rgba(255,255,255,0.3)",
+                        ),
+                        rx.text(
+                            "JPEG · PNG · GIF · MP4 · max 10 MB each · up to 4 files",
+                            font_family="'DM Mono', monospace",
+                            font_size="0.60rem",
+                            color="rgba(255,255,255,0.15)",
+                        ),
+                        spacing="2",
+                        align="center",
+                    ),
+                    id="media_upload_edit",
+                    multiple=True,
+                    accept={
+                        "image/jpeg": [".jpg", ".jpeg"],
+                        "image/png": [".png"],
+                        "image/gif": [".gif"],
+                        "video/mp4": [".mp4"],
+                    },
+                    border="1px dashed rgba(255,255,255,0.1)",
+                    padding="2em",
+                    border_radius="12px",
+                    background="rgba(255,255,255,0.01)",
+                    _hover={
+                        "border_color": "rgba(255,255,255,0.2)",
+                        "background": "rgba(255,255,255,0.02)",
+                    },
+                    width="100%",
+                    on_drop=DashboardState.handle_upload(
+                        rx.upload_files(upload_id="media_upload_edit")),
+                ),
+                # File list — rendered below the upload box once files are selected
+                rx.cond(
+                    DashboardState.media_files.length() > 0,
+                    rx.vstack(
+                        rx.hstack(
+                            rx.text(
+                                DashboardState.media_files.length().to_string() + " file(s) selected",
+                                font_family="'DM Mono', monospace",
+                                font_size="0.63rem",
+                                color="rgba(255,255,255,0.35)",
+                            ),
+                            rx.spacer(),
+                            rx.hstack(
+                                rx.icon("trash-2", size=11,
+                                        color="rgba(255,80,80,0.65)"),
+                                rx.text(
+                                    "clear all",
+                                    font_family="'DM Mono', monospace",
+                                    font_size="0.62rem",
+                                    color="rgba(255,80,80,0.65)",
+                                ),
+                                spacing="1",
+                                align="center",
+                                cursor="pointer",
+                                on_click=DashboardState.set_media_files([]),
+                                _hover={"opacity": "0.7"},
+                            ),
+                            width="100%",
+                            align="center",
+                        ),
+                        rx.foreach(
+                            DashboardState.media_files,
+                            lambda f: rx.hstack(
+                                rx.icon("file-check", size=12,
+                                        color="#00FFB2"),
+                                rx.text(
+                                    f[0],
+                                    font_family="'DM Mono', monospace",
+                                    font_size="0.65rem",
+                                    color="#00FFB2",
+                                    overflow="hidden",
+                                    text_overflow="ellipsis",
+                                    white_space="nowrap",
+                                ),
+                                spacing="2",
+                                align="center",
+                                padding="0.35em 0.8em",
+                                background="rgba(0,255,178,0.04)",
+                                border="1px solid rgba(0,255,178,0.15)",
+                                border_radius="6px",
+                                width="100%",
+                                overflow="hidden",
+                            ),
+                        ),
+                        gap="0.5em",
+                        width="100%",
+                        padding="0.75em",
+                        background="rgba(255,255,255,0.01)",
+                        border="1px solid rgba(255,255,255,0.05)",
+                        border_radius="10px",
+                    ),
+                ),
+                spacing="2",
+                width="100%",
+                align="start",
+            ),
+            post_btn("Edit Post →"),
+            spacing="5",
+            align="start",
+            width="55%",
+        ),
+        rx.box(
+            platform_previews_panel(),
+            min_width="320px",
+            max_width="400px",
+            width="45%",
+            position="sticky",
+            top="1.5em",
+            align_self="start",
+        ),
+        width="100%",
+        align="start",
+        gap="4em",
+    )
+
+    return rx.vstack(
+        slabel("// edit post"),
+        rx.hstack(
+            rx.link(
+                rx.hstack(
+                    rx.icon("arrow-left", size=11, color="rgba(255,255,255,0.5)"),
+                    rx.text("Home", font_family="'DM Mono', monospace",
+                            font_size="0.9rem", color="rgba(255,255,255,0.5)"),
+                    spacing="2", align="center",
+                ),
+                href="/", text_decoration="none",
+                _hover={"opacity": "0.7"}, transition="opacity 0.15s",
+            ),
+            height="100%", spacing="1", align="start", width="100%",
+        ),
+        rx.html(
+            '<h2 style="font-family:Syne,sans-serif;font-size:1.6rem;font-weight:800;color:white;margin:0 0 0.1em 0;letter-spacing:-0.02em">Edit Post</h2>'
+        ),
+        rx.cond(
+            DashboardState.edit_post_id == "",
+            list_view,
+            edit_form,
+        ),
+        spacing="5",
+        align="start",
+        width="100%",
         on_mount=DashboardState.load_posts,
     )
