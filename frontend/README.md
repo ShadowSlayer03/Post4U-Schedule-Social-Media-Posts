@@ -1,46 +1,66 @@
+# Post4U - Frontend
 
-## Post4U Frontend
+Reflex-powered dashboard for composing, scheduling, previewing, and managing social media posts. Connects to the Post4U FastAPI backend.
 
-A self-hosted open source frontend for scheduling and managing posts to X (Twitter), Reddit, Telegram, and Discord, built with Reflex.
+### ✨ Features
+- **Modern UI**: Clean, responsive dashboard built with **Reflex**.
+- **Unified Composer**: Create one post, preview it for all 4 platforms instantly.
+- **Smart Tabs**:
+  - **Schedule Post**: Calendar-based scheduling.
+  - **Post Now**: Instant multi-platform blasts.
+  - **Edit/Unschedule**: Full control over your pending drafts.
+  - **History**: Traceable post status (Success/Failed) with full logs.
+- **Rich Media**: Dedicated upload zone for post attachments.
+- **Dynamic Previews**: Live X, Reddit, Telegram, and Discord templates.
+- **Auto-Scraping**: Fetches OpenGraph (OG) data (Title, Image, Desc) for links.
+- **Character Limits**: Visual counters to prevent over-length posts per platform.
 
-### Features
-- User-friendly dashboard for creating and scheduling posts
-- Cross-post to multiple platforms from one form
-- View post history and per-platform publish status
-- Unschedule pending posts
-- Connects to the FastAPI backend
+### 🛠️ Tech Stack
+- **Reflex**: Pure Python-based web framework for building performant web apps.
+- **httpx**: Modern async HTTP client for backend communication.
+- **BeautifulSoup4**: Robust link metadata scraping.
+- **PyTZ**: Precise timezone synchronization for scheduling.
 
-### Tech Stack
-- Python 3.11+
-- Reflex
-- httpx (async HTTP client)
-- python-dotenv
+### Local Dev Setup
 
-### Setup
-1. Clone the repository and navigate to the frontend folder:
-	```bash
-	git clone https://github.com/ShadowSlayer03/Post4U-Schedule-Social-Media-Posts.git
-	cd frontend
-	```
-2. Create and activate a virtual environment (using uv):
-	```bash
-	uv venv
-	.venv\Scripts\activate  # Windows
-	source .venv/bin/activate  # macOS/Linux
-	```
-3. Install dependencies:
-	```bash
-	uv pip install -r requirements.txt
-	```
-4. Create a `.env` file in the `frontend/` directory with your API key:
-	```env
-	POST4U_API_KEY=your_generated_key_here
-	```
-	> This must match the `POST4U_API_KEY` set in the backend `.env`. The frontend reads this at runtime and sends it as an `X-API-Key` header with every request to the backend. Without it, all API calls will return `401 Unauthorized`.
-5. Start the Reflex app:
-	```bash
-	uv run reflex run
-	```
+Requires [uv](https://github.com/astral-sh/uv) and the backend already running.
+
+```bash
+cd frontend
+uv venv && .venv\Scripts\activate   # Windows
+# source .venv/bin/activate          # macOS/Linux
+uv pip install -r requirements.txt
+cp .env.example .env                 # fill in credentials
+uv run reflex run
+```
+
+> Dashboard is live at `http://localhost:3000`. Reflex also uses port `8001` internally — keep both free.
+
+### Environment Variables
+
+Create a `.env` file inside the `frontend/` directory:
+
+| Variable | Required | Description |
+|---|---|---|
+| `POST4U_API_KEY` | ✅ | Must match the key set in the backend `.env`. Sent as `X-API-Key` on every request. |
+| `BACKEND_URL` | ✅ | URL of the FastAPI backend. Defaults to `http://localhost:8000`. |
+
+```env
+POST4U_API_KEY=your_secret_key_here
+BACKEND_URL=http://localhost:8000
+```
+
+#### Connecting to a remote / Docker backend
+
+If the backend is running on another machine or inside Docker, just update `BACKEND_URL`:
+
+```env
+BACKEND_URL=http://192.168.1.100:8000
+# or for Docker on the same machine:
+BACKEND_URL=http://host.docker.internal:8000
+```
+
+No code changes needed — the state manager reads this at runtime.
 
 ### Usage
 - Access the frontend in your browser at `http://localhost:3000`
@@ -50,10 +70,14 @@ A self-hosted open source frontend for scheduling and managing posts to X (Twitt
 The frontend reads `POST4U_API_KEY` from its own `.env` file via `python-dotenv` and sends it as the `X-API-Key` header on every backend request. Keep your frontend `.env` out of version control (it is already covered by `.gitignore`).
 
 ### Contributing
-Contributions are welcome! Please open issues or submit pull requests for bug fixes, features, or improvements.
+Contributions are welcome! Open an issue first for large changes.
 
 ### License
 MIT License
+
+---
+
+← [Back to main README](../README.md) | [Backend README →](../backend/README.md)
 
 ### Maintainers
 - ShadowSlayer03 (admin)
