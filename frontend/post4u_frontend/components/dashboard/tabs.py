@@ -609,7 +609,6 @@ def unschedule_tab() -> rx.Component:
 
 
 def _edit_ptoggle(icon_name: str, label: str, pid: str, color: str) -> rx.Component:
-    """Platform toggle bound to edit_post_platforms state."""
     s = DashboardState.edit_post_platforms.contains(pid)
     return rx.box(
         rx.hstack(

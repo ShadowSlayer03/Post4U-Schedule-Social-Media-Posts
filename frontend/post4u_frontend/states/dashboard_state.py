@@ -303,7 +303,6 @@ class DashboardState(rx.State):
             if "T" in raw_time and (raw_time.endswith("Z") or "+" in raw_time[10:] or raw_time.count("-") > 2):
                 clean = raw_time.replace("Z", "+00:00")
                 utc_dt = datetime.fromisoformat(clean).astimezone(pytz.utc)
-                print(f"[Datetime] Already has tz, normalised to UTC: {utc_dt}")
                 return utc_dt.strftime("%Y-%m-%dT%H:%M:%SZ")
 
             if len(raw_time) == 16:
