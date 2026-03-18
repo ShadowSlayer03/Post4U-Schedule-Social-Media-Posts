@@ -44,6 +44,7 @@ def sidebar() -> rx.Component:
             rx.vstack(
                 tab_item("calendar", "Schedule Post", "schedule"),
                 tab_item("send", "Post Now", "post_now"),
+                tab_item("file_pen", "Edit Post", "edit_post"),
                 tab_item("trash-2", "Unschedule Post", "unschedule"),
                 tab_item("list", "History", "history"),
                 spacing="1", width="100%",
