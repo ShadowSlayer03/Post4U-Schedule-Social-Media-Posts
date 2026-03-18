@@ -27,22 +27,22 @@ Post to all four from one form. Right now, or on a schedule.
 
 ## 🔥 Features
 
-- **Compose once, post everywhere** — one form, four platforms, zero repetition
-- **Schedule with confidence** — jobs persist across server restarts (MongoDB-backed)
-- **Smart retry** — only failed platforms are retried; successful ones never re-post
-- **Live previews** — see how your post looks on X, Reddit, Telegram, and Discord *before* sending
-- **OG link previews** — paste a URL and metadata is auto-fetched (title, image, description)
-- **Character counters** — real-time per-platform limits so you never go over
-- **Edit & Unschedule** — change your mind before it goes live
-- **Media uploads** — attach images directly from the dashboard
-- **API-first** — the FastAPI backend works standalone; connect any client you want
-- **Rate limited & secure** — API key auth on all endpoints, SSRF protection baked in
+- **Compose once, post everywhere** - one form, four platforms, zero repetition
+- **Schedule with confidence** - jobs persist across server restarts (MongoDB-backed)
+- **Smart retry** - only failed platforms are retried; successful ones never re-post
+- **Live previews** - see how your post looks on X, Reddit, Telegram, and Discord *before* sending
+- **OG link previews** - paste a URL and metadata is auto-fetched (title, image, description)
+- **Character counters** - real-time per-platform limits so you never go over
+- **Edit & Unschedule** - change your mind before it goes live
+- **Media uploads** - attach images directly from the dashboard
+- **API-first** - the FastAPI backend works standalone; connect any client you want
+- **Rate limited & secure** - API key auth on all endpoints, SSRF protection baked in
 
 ---
 
 ## 📸 Screenshots
 
-<img src="/screenshots/hero.png" width="600" alt="Hero" width="100%" /><br>
+<img src="/screenshots/hero.png" alt="Hero" width="100%" /><br>
 
 <details>
   <summary>Click to view Dashboard</summary>
