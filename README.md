@@ -42,17 +42,17 @@ Post to all four from one form. Right now, or on a schedule.
 
 ## 📸 Screenshots
 
-<img src="/screenshots/hero.png" width="600" alt="Hero" /><br>
+<img src="/screenshots/hero.png" width="600" alt="Hero" width="100%" /><br>
 
 <details>
   <summary>Click to view Dashboard</summary>
   <p align="center">
     <br><br>
-    <img src="/screenshots/schedule_post.png" width="45%" />
-    <img src="/screenshots/post_immediately.png" width="45%" /><br>
-    <img src="/screenshots/edit_post.png" width="45%" />
-    <img src="/screenshots/unschedule_post.png" width="45%" /><br>
-    <img src="/screenshots/post_history.png" width="80%" />
+    <img src="/screenshots/schedule_post.png" width="90%" />
+    <img src="/screenshots/post_immediately.png" width="90%" /><br>
+    <img src="/screenshots/edit_post.png" width="90%" />
+    <img src="/screenshots/unschedule_post.png" width="90%" /><br>
+    <img src="/screenshots/post_history.png" width="90%" />
   </p>
 </details>
 
