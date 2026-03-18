@@ -42,13 +42,11 @@ Post to all four from one form. Right now, or on a schedule.
 
 ## 📸 Screenshots
 
-> Replace placeholders with your actual screenshots once the app is running.
+<img src="/screenshots/hero.png" width="600" alt="Hero" /><br>
 
 <details>
-  <summary>Click to view Gallery 🖼️</summary>
+  <summary>Click to view Dashboard</summary>
   <p align="center">
-    <img src="/screenshots/hero.png" width="600" alt="Hero" /><br>
-    <em>Homepage Hero</em>
     <br><br>
     <img src="/screenshots/schedule_post.png" width="45%" />
     <img src="/screenshots/post_immediately.png" width="45%" /><br>
