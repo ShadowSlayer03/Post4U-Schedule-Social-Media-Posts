@@ -164,15 +164,13 @@ def _discord_og_embed() -> rx.Component:
 
 def x_preview_card() -> rx.Component:
     header = rx.hstack(
-        _avatar("P4", "linear-gradient(135deg,#00FFB2,#0099FF)", size="36px"),
+        _avatar("P4U", "linear-gradient(135deg,#00FFB2,#0099FF)", size="36px"),
         rx.vstack(
             rx.text("Post4U", font_weight="700", font_size="0.85rem", color="white", font_family=SANS),
             rx.text("@post4u_app", font_size="0.72rem", color="rgba(255,255,255,0.4)", font_family=MONO),
             spacing="0", align="start",
         ),
         rx.spacer(),
-        rx.text("𝕏", font_size="1.1rem", color="white", font_weight="700"),
-        spacing="2", align="center", width="100%",
     )
     footer = rx.hstack(
         _action_item("heart", "100"),
