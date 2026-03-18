@@ -27,6 +27,7 @@ class PostRecord(BaseModel):
     status: dict[str, PlatformStatus]
     created_at: str
     scheduled_time: Optional[str] = None
+    media_paths: Optional[list[str]] = None
 
 class CharLimits(BaseModel):
     platform: str
@@ -50,6 +51,13 @@ class DashboardState(rx.State):
     og_description: str = ""
     og_url: str = ""
     is_fetching_og: bool = False
+
+    # Edit Post tab
+    edit_post_id: str = ""
+    edit_post_content: str = ""
+    edit_post_platforms: list[str] = []
+    edit_post_scheduled_time: str | None = None
+    edit_post_media_files: list[str] = []
 
     # Constant but can be changed acc to platform capabilities
     limits = {"x": 280, "reddit": 40000, "telegram": 4096, "discord": 2000}
@@ -78,6 +86,16 @@ class DashboardState(rx.State):
         if not self.platforms:
             return 2000
         return min([self.limits.get(p, 2000) for p in self.platforms])
+
+    @rx.var
+    def posts_that_can_be_edited(self) -> list[PostRecord]:
+        editable_posts = []
+        if self.posts:
+            for p in self.posts:
+                current_time_utc = datetime.now(pytz.utc)
+                if p.status == {} and p.scheduled_time > current_time_utc.isoformat():
+                    editable_posts.append(p)
+        return editable_posts
 
     @rx.event
     def set_tab(self, tab: str):
@@ -214,6 +232,47 @@ class DashboardState(rx.State):
         self.delete_post_content = val.split(" | ")[1] if " | " in val else ""
 
     @rx.event
+    def select_post_for_edit(self, post_id: str):
+        """Populate the edit form by finding the post in self.posts."""
+        for post in self.posts:
+            if post.id == post_id:
+                self.edit_post_id = post.id
+                self.edit_post_content = post.content
+                self.edit_post_platforms = list(post.platforms)
+                self.edit_post_scheduled_time = post.scheduled_time
+                self.edit_post_media_files = post.media_paths if hasattr(post, "media_paths") else []
+
+                print("Media files for edit:", self.edit_post_media_files)
+        return
+
+    @rx.event
+    def clear_edit_selection(self):
+        self.edit_post_id = ""
+        self.edit_post_content = ""
+        self.edit_post_platforms = []
+        self.edit_post_scheduled_time = None
+        self.edit_post_media_files = []
+
+    @rx.event
+    def set_edit_content(self, val: str):
+        self.edit_post_content = val
+
+    @rx.event
+    def set_edit_post_media_files(self, val: list[str]):
+        self.edit_post_media_files = val
+
+    @rx.event
+    def toggle_edit_platform(self, platform: str):
+        if platform in self.edit_post_platforms:
+            self.edit_post_platforms = [p for p in self.edit_post_platforms if p != platform]
+        else:
+            self.edit_post_platforms = self.edit_post_platforms + [platform]
+
+    @rx.event
+    def set_edit_scheduled_time(self, val: str):
+        self.edit_post_scheduled_time = val
+
+    @rx.event
     def clear_form(self):
         self.content = ""
         self.platforms = []
@@ -240,10 +299,11 @@ class DashboardState(rx.State):
           2. Naive string from local input: "2026-03-06 02:00"
         """
         try:
-            if "T" in raw_time and raw_time.endswith("Z"):
+            # Handle any ISO 8601 string that already carries timezone info (Z or +HH:MM)
+            if "T" in raw_time and (raw_time.endswith("Z") or "+" in raw_time[10:] or raw_time.count("-") > 2):
                 clean = raw_time.replace("Z", "+00:00")
-                utc_dt = datetime.fromisoformat(clean)
-                print(f"[Datetime] Already UTC: {utc_dt}")
+                utc_dt = datetime.fromisoformat(clean).astimezone(pytz.utc)
+                print(f"[Datetime] Already has tz, normalised to UTC: {utc_dt}")
                 return utc_dt.strftime("%Y-%m-%dT%H:%M:%SZ")
 
             if len(raw_time) == 16:
@@ -268,22 +328,30 @@ class DashboardState(rx.State):
 
     @rx.event
     async def submit_post(self):
-        if not self.content:
+        is_edit = self.active_tab == "edit_post"
+
+        content = self.edit_post_content if is_edit else self.content
+        platforms = self.edit_post_platforms if is_edit else self.platforms
+        scheduled_time = self.edit_post_scheduled_time if is_edit else self.scheduled_time
+
+        if not content:
             yield rx.toast.warning("Content cannot be empty.", duration=5000)
             return
 
-        if not self.platforms:
+        if not platforms:
             yield rx.toast.warning("Pick at least one platform.", duration=5000)
             return
-        
-        for c in self.char_limits:
-            if c["is_over"]:
-                yield rx.toast.warning(f"Content exceeds character limit for {c['platform']}.", duration=5000)
+
+        content_len = len(content)
+        for p in platforms:
+            limit = self.limits.get(p, 2000)
+            if content_len > limit:
+                yield rx.toast.warning(f"Content exceeds character limit for {p.capitalize()}.", duration=5000)
                 return
 
         utc_iso = None
-        if self.scheduled_time:
-            utc_iso = self._parse_to_utc(self.scheduled_time)
+        if scheduled_time:
+            utc_iso = self._parse_to_utc(scheduled_time)
             if utc_iso is None:
                 yield rx.toast.error("Invalid scheduled time format.", duration=5000)
                 return
@@ -294,8 +362,8 @@ class DashboardState(rx.State):
 
         try:
             data = {
-                "content": self.content,
-                "platforms": ",".join(self.platforms),
+                "content": content,
+                "platforms": ",".join(platforms),
             }
 
             if utc_iso:
@@ -308,18 +376,39 @@ class DashboardState(rx.State):
             api_key = os.getenv("POST4U_API_KEY")
 
             async with httpx.AsyncClient() as client:
-                r = await client.post(
-                    "http://localhost:8000/posts/",
+                if is_edit:
+                    url = f"http://localhost:8000/posts/{self.edit_post_id}/"
+                else:
+                    url = "http://localhost:8000/posts/"
+                
+                if is_edit:
+                    r = await client.put(
+                    url,
                     data=data,
                     files=files,
-                    headers={
-                        "X-API-Key": api_key
-                    },
+                    headers={"X-API-Key": api_key},
+                    timeout=10
+                    )
+                else:
+                    r = await client.post(
+                    url,
+                    data=data,
+                    files=files,
+                    headers={"X-API-Key": api_key},
                     timeout=10
                 )
                 if r.status_code == 200:
-                    yield rx.toast.success("Posted successfully!", duration=5000)
-                    self.clear_form()
+                    if is_edit:
+                        yield rx.toast.success("Post updated successfully!", duration=5000)
+                        self.clear_edit_selection()
+                        self.media_files = []
+                        yield DashboardState.load_posts
+                    elif self.active_tab == "schedule":
+                        yield rx.toast.success("Scheduled successfully!", duration=5000)
+                        self.clear_form()
+                    else:
+                        yield rx.toast.success("Posted successfully!", duration=5000)
+                        self.clear_form()
                 else:
                     yield rx.toast.error(f"Error: {r.text}", duration=5000)
 
