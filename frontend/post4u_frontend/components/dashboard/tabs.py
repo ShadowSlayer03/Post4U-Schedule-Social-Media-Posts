@@ -609,6 +609,7 @@ def unschedule_tab() -> rx.Component:
 
 
 def _edit_ptoggle(icon_name: str, label: str, pid: str, color: str) -> rx.Component:
+    """Platform toggle for the Edit Post inside platform row."""
     s = DashboardState.edit_post_platforms.contains(pid)
     return rx.box(
         rx.hstack(
@@ -626,6 +627,7 @@ def _edit_ptoggle(icon_name: str, label: str, pid: str, color: str) -> rx.Compon
 
 
 def _edit_prow() -> rx.Component:
+    """Platform row for the Edit Post tab."""
     return rx.hstack(
         _edit_ptoggle("twitter", "X", "x", "#1DA1F2"),
         _edit_ptoggle("message-circle", "Reddit", "reddit", "#FF4500"),
