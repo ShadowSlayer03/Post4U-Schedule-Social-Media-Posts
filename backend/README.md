@@ -3,20 +3,21 @@
 FastAPI backend powering Post4U. Handles platform routing, MongoDB persistence, job scheduling, media uploads, OG scraping, and retry logic. Can be used standalone with any HTTP client.
 
 ### Features
-- **Smart Scheduling**: Schedule posts for X, Reddit, Telegram, and Discord.
+- **Smart Scheduling**: Schedule posts for X, Reddit, Telegram, Discord, and Bluesky.
 - **Immediate Posting**: Publish to all platforms instantly.
 - **Draft Management**: Edit or Unschedule pending posts.
 - **Persistent Jobs**: Scheduled jobs survive server restarts via MongoDB JobStore.
 - **Fail-Safe Posting**: Per-platform retry logic (up to 3 attempts); only failed platforms are retried.
 - **Rich Media**: Supports image uploads and link metadata scraping (OG data).
 - **Security**: API key protection (`X-API-Key`) and Rate Limiting.
-- **Real-time Previews**: High-fidelity, platform-specific logic for X, Reddit, Telegram, and Discord.
+- **Real-time Previews**: High-fidelity, platform-specific logic for X, Reddit, Telegram, Discord, and Bluesky.
 
 ### Tech Stack
 - **FastAPI**: Modern, fast (high-performance) web framework.
 - **Beanie**: Async MongoDB ODM.
 - **APScheduler**: Advanced Python Scheduler with MongoDB backend.
 - **Tweepy & PRAW**: Official clients for X and Reddit.
+- **ATProto**: Official client for Bluesky.
 - **httpx & BeautifulSoup4**: For OG data scraping and SSRF protection.
 
 ### Local Dev Setup
@@ -118,6 +119,16 @@ TELEGRAM_CHANNEL_ID=@yourchannel
 DISCORD_WEBHOOK_URL=https://discord.com/api/webhooks/...
 ```
 
+#### Bluesky
+1. Go to your Bluesky Settings → **App Passwords** → **Create App Password**
+2. Your `BLUESKY_APP_ID` is your full handle (e.g. `you.bsky.social`)
+
+```env
+BLUESKY_APP_ID=you.bsky.social
+BLUESKY_APP_PASSWORD=abcd-efgh-ijkl-mnop
+BLUESKY_APP_NAME=Post4U
+```
+
 ### Environment Variables
 
 | Variable | Required | Description |
@@ -136,6 +147,9 @@ DISCORD_WEBHOOK_URL=https://discord.com/api/webhooks/...
 | `TELEGRAM_BOT_TOKEN` | ⬜ | Telegram bot token from BotFather |
 | `TELEGRAM_CHANNEL_ID` | ⬜ | Channel ID or `@handle` |
 | `DISCORD_WEBHOOK_URL` | ⬜ | Full Discord webhook URL |
+| `BLUESKY_APP_ID` | ⬜ | Bluesky handle (e.g. `you.bsky.social`) |
+| `BLUESKY_APP_PASSWORD` | ⬜ | App password from Bluesky settings |
+| `BLUESKY_APP_NAME` | ⬜ | Display name for Bluesky (e.g. `Post4U`) |
 
 > Leaving a platform's variables blank skips that platform gracefully — no crash.
 
