@@ -3,6 +3,7 @@ from app.controllers.post_reddit import post_to_reddit
 from app.controllers.post_discord import post_to_discord
 from app.controllers.post_telegram import post_to_telegram
 from app.controllers.post_x import post_tweet
+from app.controllers.post_bluesky import post_to_bluesky
 from app.config import settings
 
 def _publish_sync(platform: str, content: str, media_paths: list[str] = None) -> dict:
@@ -24,6 +25,11 @@ def _publish_sync(platform: str, content: str, media_paths: list[str] = None) ->
         if not settings.DISCORD_WEBHOOK_URL:
             return {"status": "skipped", "message": "Discord credentials not set"}
         return post_to_discord(content, media_paths=media_paths)
+    elif platform == "bluesky":
+        if not settings.BLUESKY_APP_ID:
+            return {"status": "skipped", "message": "Bluesky credentials not set"}
+        
+        return post_to_bluesky(content, media_paths=media_paths)
     else:
         return {"status": "error", "message": f"Unsupported platform: {platform}"}
 
