@@ -556,7 +556,7 @@ def unschedule_tab() -> rx.Component:
         ),
         rx.box(
             rx.hstack(
-                rx.icon("alert-triangle", size=14,
+                rx.icon("triangle_alert", size=14,
                         color="rgba(255,180,0,0.6)"),
                 rx.text(
                     "This does not delete the post from the platform if it was already posted.",
