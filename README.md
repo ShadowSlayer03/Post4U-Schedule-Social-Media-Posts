@@ -64,9 +64,12 @@ Post to all five from one form. Right now, or on a schedule.
 ```bash
 git clone https://github.com/ShadowSlayer03/Post4U-Schedule-Social-Media-Posts.git ./post4u
 cd post4u
-cp .env.example .env        # add your platform credentials
+cp backend/.env.example backend/.env    # add platform credentials + generate API key
+cp frontend/.env.example frontend/.env  # paste the same API key here
 docker compose up --build -d
 ```
+
+> **`POST4U_API_KEY` must be set to the same value in both `backend/.env` and `frontend/.env`.**
 
 | Service | URL |
 |---|---|
