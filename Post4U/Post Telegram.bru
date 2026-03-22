@@ -4,22 +4,15 @@ meta {
   seq: 3
 }
 
-get {
+post {
   url: http://localhost:8000/posts/
-  body: json
+  body: multipartForm
   auth: inherit
 }
 
-headers {
-  ~X-API-KEY: 81b082b0f5ff22301214727b95b709a3c67361ad1ac6b4aa4c1233c146a03185
-}
-
-body:json {
-  {
-    "content": "🛠 <b>Post4U Dev Log — March 3</b>\n\nThis update was sent via the Post4U API!\n\n<b>Latest Updates:</b>\n✅ Discord Webhook integration is now verified and working.\n🚀 Started building the frontend using <b>Reflex</b>—no more Postman needed soon.\n\nNext goal: Reddit API approval. \n\nStar the progress: https://github.com/ShadowSlayer03/Post4U-Schedule-Social-Media-Posts",
-    "platforms": ["Telegram"],
-    "scheduled_time": "2026-03-03T10:30:00Z"
-  }
+body:multipart-form {
+  content: 🛠 <b>Post4U Dev Log — March 3</b>\n\nThis update was sent via the Post4U API!\n\n<b>Latest Updates:</b>\n✅ Discord Webhook integration is now verified and working.\n🚀 Started building the frontend using <b>Reflex</b>—no more Postman needed soon.\n\nNext goal: Reddit API approval. \n\nStar the progress: https://github.com/ShadowSlayer03/Post4U-Schedule-Social-Media-Posts
+  platforms: Telegram
 }
 
 settings {

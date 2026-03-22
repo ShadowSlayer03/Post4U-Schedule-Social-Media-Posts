@@ -10,23 +10,8 @@ post {
   auth: inherit
 }
 
-headers {
-  ~X-API-KEY: 81b082b0f5ff22301214727b95b709a3c67361ad1ac6b4aa4c1233c146a03185
-}
-
-body:json {
-  {
-    "content": "🚀 Excited to announce that #Post4U now supports image uploads! Testing the new file upload feature for tweets. #BuildInPublic #OpenSource #Python\n\nStar the progress: https://github.com/ShadowSlayer03/Post4U-Schedule-Social-Media-Posts",
-    "platforms": [
-      "X"
-    ],
-    "scheduled_time": "2026-03-03T10:30:00Z",
-    "media":
-  }
-}
-
 body:multipart-form {
-  content: Posted from Post4U.
+  content: 🚀 Excited to announce that #Post4U now supports image uploads! Testing the new file upload feature for tweets. #BuildInPublic #OpenSource #Python\n\nStar the progress: https://github.com/ShadowSlayer03/Post4U-Schedule-Social-Media-Posts
   platforms: X
   scheduled_time: 2026-03-04T02:00:00.000Z
   ~media: 
