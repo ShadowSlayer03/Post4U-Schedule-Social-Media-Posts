@@ -86,15 +86,6 @@ docker compose up --build -d
 
 ---
 
-## 🛣️ Roadmap
-
-- [ ] Bluesky + Mastodon support
-- [ ] AI-powered caption suggestions
-- [ ] Multi-account management
-- [ ] Analytics dashboard
-
----
-
 ## 🤝 Contributing
 
 PRs are welcome! Open an issue first for large changes.
