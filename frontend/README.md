@@ -4,14 +4,14 @@ Reflex-powered dashboard for composing, scheduling, previewing, and managing soc
 
 ### ✨ Features
 - **Modern UI**: Clean, responsive dashboard built with **Reflex**.
-- **Unified Composer**: Create one post, preview it for all 4 platforms instantly.
+- **Unified Composer**: Create one post, preview it for all 5 platforms instantly.
 - **Smart Tabs**:
   - **Schedule Post**: Calendar-based scheduling.
   - **Post Now**: Instant multi-platform blasts.
   - **Edit/Unschedule**: Full control over your pending drafts.
   - **History**: Traceable post status (Success/Failed) with full logs.
 - **Rich Media**: Dedicated upload zone for post attachments.
-- **Dynamic Previews**: Live X, Reddit, Telegram, and Discord templates.
+- **Dynamic Previews**: Live X, Reddit, Telegram, Discord, and Bluesky templates.
 - **Auto-Scraping**: Fetches OpenGraph (OG) data (Title, Image, Desc) for links.
 - **Character Limits**: Visual counters to prevent over-length posts per platform.
 
