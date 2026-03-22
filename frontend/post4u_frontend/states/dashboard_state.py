@@ -70,6 +70,7 @@ class DashboardState(rx.State):
         return [
             f"{p.id} | {p.content[:40]}"
             for p in self.posts
+                if p.status == {} and p.scheduled_time and p.scheduled_time > datetime.now(pytz.utc).isoformat()
         ]
     
     @rx.var
@@ -473,3 +474,4 @@ class DashboardState(rx.State):
             yield rx.toast.error(f"Connection error: {str(e)}", duration=5000)
 
         self.is_posting = False
+        self.delete_post_content = ""
