@@ -15,7 +15,7 @@ load_dotenv()
 
 class PlatformStatus(BaseModel):
     status: str = "unknown"
-    platform_post_id: Optional[str] = None
+    platform_post_id: Optional[str | int] = None
     error: Optional[str] = None
     message: Optional[str] = None
 
@@ -60,7 +60,7 @@ class DashboardState(rx.State):
     edit_post_media_files: list[str] = []
 
     # Constant but can be changed acc to platform capabilities
-    limits = {"x": 280, "reddit": 40000, "telegram": 4096, "discord": 2000}
+    limits = {"x": 280, "reddit": 40000, "telegram": 4096, "discord": 2000, "bluesky": 300}
 
     _MAX_RESPONSE_BYTES = 512_000
 
@@ -94,7 +94,7 @@ class DashboardState(rx.State):
         if self.posts:
             for p in self.posts:
                 current_time_utc = datetime.now(pytz.utc)
-                if p.status == {} and p.scheduled_time > current_time_utc.isoformat():
+                if p.status == {} and p.scheduled_time!=None and p.scheduled_time > current_time_utc.isoformat():
                     editable_posts.append(p)
         return editable_posts
 
