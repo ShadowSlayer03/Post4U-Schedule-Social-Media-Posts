@@ -1,0 +1,27 @@
+meta {
+  name: Post Bluesky
+  type: http
+  seq: 5
+}
+
+post {
+  url: http://localhost:8000/posts/
+  body: multipartForm
+  auth: inherit
+}
+
+headers {
+  X-API-KEY: 81b082b0f5ff22301214727b95b709a3c67361ad1ac6b4aa4c1233c146a03185
+}
+
+body:multipart-form {
+  content: Scheduled posting of this beautiful pic that I wanted to share at 10:50am est
+  platforms: Bluesky
+  scheduled_time: 2026-03-22T14:46:00.000Z
+  media: @file(C:\Users\sslay\Downloads\diamond.png)
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

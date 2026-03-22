@@ -1,0 +1,27 @@
+meta {
+  name: Post Discord
+  type: http
+  seq: 6
+}
+
+post {
+  url: http://localhost:8000/posts/
+  body: multipartForm
+  auth: inherit
+}
+
+headers {
+  X-API-KEY: 81b082b0f5ff22301214727b95b709a3c67361ad1ac6b4aa4c1233c146a03185
+}
+
+body:multipart-form {
+  content: Wassap fam? Post4U discord for life!!
+  platforms: Discord
+  media: @file(C:\Users\sslay\OneDrive\Pictures\Predator\2024_Predator_Default_3840x2400.jpg)
+  ~scheduled_time: 
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
