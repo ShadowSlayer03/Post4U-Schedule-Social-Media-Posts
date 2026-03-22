@@ -1,0 +1,20 @@
+meta {
+  name: Load Posts
+  type: http
+  seq: 2
+}
+
+get {
+  url: http://localhost:8000/posts/
+  body: none
+  auth: inherit
+}
+
+headers {
+  X-API-KEY: 81b082b0f5ff22301214727b95b709a3c67361ad1ac6b4aa4c1233c146a03185
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
