@@ -2,6 +2,7 @@ import reflex as rx
 from typing import Optional
 from post4u_frontend.states.dashboard_state import DashboardState
 
+
 class SelectDropdownState(rx.State):
     """Manages the open/close state of the custom select dropdown."""
     open: bool = False
@@ -45,14 +46,16 @@ def custom_select(
                 font_size=font_size,
                 color=color,
                 padding="0.6em 1em",
-                background=rx.cond(value == opt, "rgba(255,255,255,0.07)", background),
+                background=rx.cond(
+                    value == opt, "rgba(255,255,255,0.07)", background),
                 border_radius="6px",
                 cursor="pointer",
                 width="100%",
                 transition="background 0.15s",
             ),
             width="100%",
-            _hover={"background": "rgba(255,255,255,0.05)", "border_radius": "6px"},
+            _hover={"background": "rgba(255,255,255,0.05)",
+                    "border_radius": "6px"},
             on_click=[on_change(opt), SelectDropdownState.close],
             cursor="pointer",
         )
@@ -104,7 +107,11 @@ def custom_select(
             SelectDropdownState.open,
             rx.box(
                 rx.vstack(
-                    rx.foreach(options, select_item),
+                    rx.cond(options.length() == 0,
+                            rx.text("No posts available", color="rgba(255,255,255,1)",
+                                    font_family=font_family, font_size=font_size, padding="0.6em 1em"),
+                            rx.foreach(options, select_item),
+                            ),
                     spacing="0",
                     width="100%",
                 ),
