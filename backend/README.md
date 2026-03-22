@@ -187,17 +187,22 @@ All API endpoints (except the healthcheck `GET /`) require a valid `X-API-Key` h
    ```bash
    python -c "import secrets; print(secrets.token_hex(32))"
    ```
-2. Add it to your `.env`:
+2. Add it to **`backend/.env`**:
    ```env
    POST4U_API_KEY=your_generated_key_here
    ```
-3. Pass it as a header in every request:
+3. Set the **exact same value** in **`frontend/.env`**:
+   ```env
+   POST4U_API_KEY=your_generated_key_here
+   ```
+   The frontend reads this key and sends it as the `X-API-Key` header on every request to the backend. If the two values do not match, all dashboard actions will return `401 Unauthorized`.
+4. Pass it as a header when calling the API directly:
    ```bash
    curl -H "X-API-Key: your_generated_key_here" http://localhost:8000/posts/
    ```
 
-> The server **refuses to start** if `POST4U_API_KEY` is not set — this is intentional.
-> Never commit your `.env` file to git.
+> The server **refuses to start** if `POST4U_API_KEY` is not set in `backend/.env` — this is intentional.
+> Never commit either `.env` file to git.
 
 ---
 
