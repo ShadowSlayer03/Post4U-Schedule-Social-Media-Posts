@@ -1,0 +1,26 @@
+meta {
+  name: Edit Post
+  type: http
+  seq: 7
+}
+
+put {
+  url: http://localhost:8000/posts/69c013076c25e5a2986711b4
+  body: multipartForm
+  auth: inherit
+}
+
+headers {
+  X-API-KEY: 81b082b0f5ff22301214727b95b709a3c67361ad1ac6b4aa4c1233c146a03185
+}
+
+body:multipart-form {
+  content: Helloo this is to be scheduled for wayyy later in the future!
+  platforms: Discord, Telegram, Bluesky
+  scheduled_time: 2026-03-24T16:04:23.473000
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
