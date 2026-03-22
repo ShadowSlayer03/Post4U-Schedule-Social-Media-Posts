@@ -4,14 +4,14 @@ Reflex-powered dashboard for composing, scheduling, previewing, and managing soc
 
 ### ✨ Features
 - **Modern UI**: Clean, responsive dashboard built with **Reflex**.
-- **Unified Composer**: Create one post, preview it for all 4 platforms instantly.
+- **Unified Composer**: Create one post, preview it for all 5 platforms instantly.
 - **Smart Tabs**:
   - **Schedule Post**: Calendar-based scheduling.
   - **Post Now**: Instant multi-platform blasts.
   - **Edit/Unschedule**: Full control over your pending drafts.
   - **History**: Traceable post status (Success/Failed) with full logs.
 - **Rich Media**: Dedicated upload zone for post attachments.
-- **Dynamic Previews**: Live X, Reddit, Telegram, and Discord templates.
+- **Dynamic Previews**: Live X, Reddit, Telegram, Discord, and Bluesky templates.
 - **Auto-Scraping**: Fetches OpenGraph (OG) data (Title, Image, Desc) for links.
 - **Character Limits**: Visual counters to prevent over-length posts per platform.
 
@@ -42,13 +42,15 @@ Create a `.env` file inside the `frontend/` directory:
 
 | Variable | Required | Description |
 |---|---|---|
-| `POST4U_API_KEY` | ✅ | Must match the key set in the backend `.env`. Sent as `X-API-Key` on every request. |
+| `POST4U_API_KEY` | ✅ | **Must be identical to the value in `backend/.env`.** Sent as `X-API-Key` on every request. Mismatches cause `401 Unauthorized` on all actions. |
 | `BACKEND_URL` | ✅ | URL of the FastAPI backend. Defaults to `http://localhost:8000`. |
 
 ```env
-POST4U_API_KEY=your_secret_key_here
+POST4U_API_KEY=your_secret_key_here   # same value as in backend/.env
 BACKEND_URL=http://localhost:8000
 ```
+
+> **Important:** Generate the key once with `python -c "import secrets; print(secrets.token_hex(32))"` and paste the same string into both `backend/.env` and `frontend/.env`. The frontend never exposes this key to the browser — it is read server-side by the Reflex state and injected as a header.
 
 #### Connecting to a remote / Docker backend
 

@@ -277,6 +277,29 @@ def discord_preview_card() -> rx.Component:
     )
 
 
+def bluesky_preview_card() -> rx.Component:
+    header = rx.hstack(
+        _avatar("P4U", "linear-gradient(135deg,#0085FF,#0066CC)", size="36px"),
+        rx.vstack(
+            rx.text("Post4U", font_weight="700", font_size="0.85rem", color="white", font_family=SANS),
+            rx.text("@post4u.bsky.social", font_size="0.72rem", color="rgba(255,255,255,0.4)", font_family=MONO),
+            spacing="0", align="start",
+        ),
+        rx.spacer(),
+        rx.icon("cloud", size=14, color="#0085FF", self_align="end"),
+    )
+    footer = rx.hstack(
+        _action_item("heart", "50"),
+        _action_item("message-circle", "12"),
+        _action_item("repeat-2", "2"),
+        spacing="5", margin_top="0.4em",
+    )
+    return _card_shell(
+        "#0A1628", "1px solid rgba(0,133,255,0.2)",
+        header, _content_text(), _og_embed_card("rgba(0,133,255,0.2)"), footer,
+    )
+
+
 # # # # # # # # # # # # # # #  # # #
 # PREVIEW STICKY PANEL - TOWARDS SIDE
 # # # # # # # # # # # # # # # # # # #
@@ -293,6 +316,7 @@ def platform_previews_panel() -> rx.Component:
             rx.cond(DashboardState.platforms.contains("reddit"), reddit_preview_card()),
             rx.cond(DashboardState.platforms.contains("telegram"), telegram_preview_card()),
             rx.cond(DashboardState.platforms.contains("discord"), discord_preview_card()),
+            rx.cond(DashboardState.platforms.contains("bluesky"), bluesky_preview_card()),
             spacing="6", align="start", width="100%",
         ),
         rx.box(),

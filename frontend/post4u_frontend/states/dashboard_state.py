@@ -64,7 +64,7 @@ class DashboardState(rx.State):
     history_filter_status: str = ""     # "" = all, "success", "error"
 
     # Constant but can be changed acc to platform capabilities
-    limits = {"x": 280, "reddit": 40000, "telegram": 4096, "discord": 2000}
+    limits = {"x": 280, "reddit": 40000, "telegram": 4096, "discord": 2000, "bluesky": 300}
 
     _MAX_RESPONSE_BYTES = 512_000
 

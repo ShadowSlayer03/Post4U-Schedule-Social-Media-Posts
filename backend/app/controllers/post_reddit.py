@@ -1,7 +1,6 @@
 import os
 import logging
 from app.services.reddit_client import get_reddit_client
-from app.config import settings
 
 logger = logging.getLogger("uvicorn.error")
 

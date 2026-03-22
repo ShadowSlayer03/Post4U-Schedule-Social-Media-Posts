@@ -10,33 +10,8 @@ post {
   auth: inherit
 }
 
-body:json {
-  {
-    "content": "🚀 Excited to announce that #Post4U now supports image uploads! Testing the new file upload feature for tweets. #BuildInPublic #OpenSource #Python\n\nStar the progress: https://github.com/ShadowSlayer03/Post4U-Schedule-Social-Media-Posts",
-    "platforms": [
-      "X"
-    ],
-    "scheduled_time": "2026-03-03T10:30:00Z",
-    "media":
-  }
-}
-
 body:multipart-form {
-  content: '''
-    Two of my Apify actors were quietly broken and I didn't notice 👀
-    
-    Market Gap Analyzer: runaway token usage on bad inputs
-    Fake Applicant Detector: silently failing health checks - root cause was Gemini being rate limited
-    
-    Fixed both + refactored all 6 actors to use Gemini model rotation
-    Rate limit on one → auto-fallback to the next. No downtime, no manual intervention.
-    
-    Spent the later part of my holiday doing infra work. 0 regrets.
-    
-    Building resilient > building new
-    
-    #BuildInPublic #Apify #IndieHacker #AIAgents #LLM #SideProject
-  '''
+  content: 🚀 Excited to announce that #Post4U now supports image uploads! Testing the new file upload feature for tweets. #BuildInPublic #OpenSource #Python\n\nStar the progress: https://github.com/ShadowSlayer03/Post4U-Schedule-Social-Media-Posts
   platforms: X
   scheduled_time: 2026-03-04T02:00:00.000Z
   ~media: 

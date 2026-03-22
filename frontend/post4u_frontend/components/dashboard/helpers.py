@@ -101,5 +101,6 @@ def prow() -> rx.Component:
         ptoggle("message-circle", "Reddit", "reddit", "#FF4500"),
         ptoggle("send", "Telegram", "telegram", "#229ED9"),
         ptoggle("hash", "Discord", "discord", "#5865F2"),
+        ptoggle("cloud", "Bluesky", "bluesky", "#0085FF"),
         spacing="3", flex_wrap="wrap",
     )

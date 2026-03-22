@@ -744,6 +744,7 @@ def _edit_prow() -> rx.Component:
         _edit_ptoggle("message-circle", "Reddit", "reddit", "#FF4500"),
         _edit_ptoggle("send", "Telegram", "telegram", "#229ED9"),
         _edit_ptoggle("hash", "Discord", "discord", "#5865F2"),
+        _edit_ptoggle("cloud", "Bluesky", "bluesky", "#0085FF"),
         spacing="3", flex_wrap="wrap",
     )
 
@@ -755,7 +756,7 @@ def _post_tile_for_edit(post) -> rx.Component:
             rx.hstack(
                 rx.hstack(
                     rx.foreach(
-                        ["x", "reddit", "telegram", "discord"],
+                        ["x", "reddit", "telegram", "discord", "bluesky"],
                         lambda plat: rx.cond(
                             post["status"].get(plat),
                             rx.box(

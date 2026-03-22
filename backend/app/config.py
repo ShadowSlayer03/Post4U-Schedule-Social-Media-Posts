@@ -26,6 +26,11 @@ class Settings(BaseSettings):
     # Discord
     DISCORD_WEBHOOK_URL: str = ""
 
+    # Bluesky
+    BLUESKY_APP_ID: str = ""
+    BLUESKY_APP_PASSWORD: str = ""
+    BLUESKY_APP_NAME: str = ""
+
     # Post4U API
     POST4U_API_KEY: str = ""
 

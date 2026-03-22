@@ -1,7 +1,7 @@
 # POST4U — Social Media Autopilot
 
 > **Write once. Post everywhere. Schedule anything.**
-> Cross-post to X, Reddit, Telegram, and Discord — from a single self-hosted dashboard. No subscriptions. No data harvesting. Your keys, your server, your data.
+> Cross-post to X, Reddit, Telegram, Discord, and Bluesky — from a single self-hosted dashboard. No subscriptions. No data harvesting. Your keys, your server, your data.
 
 <p align="center">
   <img src="https://img.shields.io/badge/Python-3.11+-3776AB?style=flat-square&logo=python&logoColor=white" />
@@ -20,17 +20,18 @@
 |---|---|
 | **X (Twitter)** | **Reddit** |
 | **Telegram** | **Discord** |
+| **Bluesky** | |
 
-Post to all four from one form. Right now, or on a schedule.
+Post to all five from one form. Right now, or on a schedule.
 
 ---
 
 ## 🔥 Features
 
-- **Compose once, post everywhere** - one form, four platforms, zero repetition
+- **Compose once, post everywhere** - one form, five platforms, zero repetition
 - **Schedule with confidence** - jobs persist across server restarts (MongoDB-backed)
 - **Smart retry** - only failed platforms are retried; successful ones never re-post
-- **Live previews** - see how your post looks on X, Reddit, Telegram, and Discord *before* sending
+- **Live previews** - see how your post looks on X, Reddit, Telegram, Discord, and Bluesky *before* sending
 - **OG link previews** - paste a URL and metadata is auto-fetched (title, image, description)
 - **Character counters** - real-time per-platform limits so you never go over
 - **Edit & Unschedule** - change your mind before it goes live
@@ -63,9 +64,12 @@ Post to all four from one form. Right now, or on a schedule.
 ```bash
 git clone https://github.com/ShadowSlayer03/Post4U-Schedule-Social-Media-Posts.git ./post4u
 cd post4u
-cp .env.example .env        # add your platform credentials
+cp backend/.env.example backend/.env    # add platform credentials + generate API key
+cp frontend/.env.example frontend/.env  # paste the same API key here
 docker compose up --build -d
 ```
+
+> **`POST4U_API_KEY` must be set to the same value in both `backend/.env` and `frontend/.env`.**
 
 | Service | URL |
 |---|---|
