@@ -350,6 +350,79 @@ def post_now_tab() -> rx.Component:
     )
 
 
+def _filter_chip(label: str, icon: str, value: str, active_var, on_click_event) -> rx.Component:
+    """Generic toggleable filter chip."""
+    active = active_var == value
+    return rx.box(
+        rx.hstack(
+            rx.icon(icon, size=11, color=rx.cond(active, "#060608", "rgba(255,255,255,0.45)")),
+            rx.text(label, font_family="'DM Mono', monospace", font_size="0.68rem",
+                    font_weight=rx.cond(active, "700", "400"),
+                    color=rx.cond(active, "#060608", "rgba(255,255,255,0.45)")),
+            spacing="1", align="center",
+        ),
+        padding_x="0.75em", padding_y="0.38em", border_radius="20px",
+        cursor="pointer",
+        background=rx.cond(active, "#00FFB2", "rgba(255,255,255,0.04)"),
+        border=rx.cond(active, "1px solid #00FFB2", "1px solid rgba(255,255,255,0.08)"),
+        on_click=on_click_event,
+        transition="all 0.15s ease",
+        _hover={"border_color": rx.cond(active, "#00FFB2", "rgba(255,255,255,0.2)")},
+    )
+
+
+def history_filter_bar() -> rx.Component:
+    """Platform + status filter row for the History tab."""
+    return rx.vstack(
+        rx.hstack(
+            rx.text("Platform", font_family="'DM Mono', monospace", font_size="0.62rem",
+                    color="rgba(255,255,255,0.25)", letter_spacing="0.08em", min_width="62px"),
+            _filter_chip("All", "layers", "", DashboardState.history_filter_platform,
+                         DashboardState.set_history_filter_platform("")),
+            _filter_chip("X", "twitter", "x", DashboardState.history_filter_platform,
+                         DashboardState.set_history_filter_platform("x")),
+            _filter_chip("Reddit", "message-circle", "reddit", DashboardState.history_filter_platform,
+                         DashboardState.set_history_filter_platform("reddit")),
+            _filter_chip("Telegram", "send", "telegram", DashboardState.history_filter_platform,
+                         DashboardState.set_history_filter_platform("telegram")),
+            _filter_chip("Discord", "hash", "discord", DashboardState.history_filter_platform,
+                         DashboardState.set_history_filter_platform("discord")),
+            _filter_chip("Bluesky", "cloud", "bluesky", DashboardState.history_filter_platform,
+                         DashboardState.set_history_filter_platform("bluesky")),
+            spacing="2", flex_wrap="wrap", align="center",
+        ),
+        rx.hstack(
+            rx.text("Status", font_family="'DM Mono', monospace", font_size="0.62rem",
+                    color="rgba(255,255,255,0.25)", letter_spacing="0.08em", min_width="62px"),
+            _filter_chip("All", "circle", "", DashboardState.history_filter_status,
+                         DashboardState.set_history_filter_status("")),
+            _filter_chip("Success", "check-circle", "success", DashboardState.history_filter_status,
+                         DashboardState.set_history_filter_status("success")),
+            _filter_chip("Failed", "x-circle", "error", DashboardState.history_filter_status,
+                         DashboardState.set_history_filter_status("error")),
+            spacing="2", align="center",
+        ),
+        rx.cond(
+            (DashboardState.history_filter_platform != "") | (DashboardState.history_filter_status != ""),
+            rx.hstack(
+                rx.icon("filter-x", size=11, color="rgba(255,80,80,0.65)"),
+                rx.text("Clear filters", font_family="'DM Mono', monospace", font_size="0.62rem",
+                        color="rgba(255,80,80,0.65)"),
+                spacing="1", align="center", cursor="pointer",
+                on_click=DashboardState.clear_history_filters,
+                _hover={"opacity": "0.7"},
+            ),
+        ),
+        padding="0.9em 1.1em",
+        background="rgba(255,255,255,0.02)",
+        border="1px solid rgba(255,255,255,0.06)",
+        border_radius="10px",
+        spacing="3",
+        align="start",
+        width="100%",
+    )
+
+
 def history_tab() -> rx.Component:
     return rx.vstack(
         slabel("// history"),
@@ -386,7 +459,23 @@ def history_tab() -> rx.Component:
             gap="0.5em",
             margin_bottom="1em",
         ),
-        refresh_posts_btn(),
+        rx.hstack(
+            refresh_posts_btn(),
+            rx.spacer(),
+            rx.cond(
+                DashboardState.posts.length() > 0,
+                rx.text(
+                    DashboardState.filtered_posts.length().to_string() + " / " +
+                    DashboardState.posts.length().to_string() + " posts",
+                    font_family="'DM Mono', monospace",
+                    font_size="0.65rem",
+                    color="rgba(255,255,255,0.2)",
+                ),
+            ),
+            width="100%",
+            align="center",
+        ),
+        history_filter_bar(),
         rx.cond(
             DashboardState.posts.length() == 0,
             rx.box(
@@ -410,114 +499,136 @@ def history_tab() -> rx.Component:
                 align_items="center",
                 justify_content="center",
             ),
-            rx.grid(
-                rx.foreach(
-                    DashboardState.posts,
-                    lambda post: rx.box(
-                        rx.vstack(
-                            rx.hstack(
+            rx.cond(
+                DashboardState.filtered_posts.length() == 0,
+                rx.box(
+                    rx.vstack(
+                        rx.icon("filter-x", size=26, color="rgba(255,255,255,0.08)"),
+                        rx.text(
+                            "No posts match the selected filters",
+                            font_family="'DM Mono', monospace",
+                            font_size="0.73rem",
+                            color="rgba(255,255,255,0.18)",
+                        ),
+                        spacing="3",
+                        align="center",
+                    ),
+                    width="100%",
+                    padding_y="4em",
+                    background="rgba(255,255,255,0.01)",
+                    border="1px solid rgba(255,255,255,0.05)",
+                    border_radius="12px",
+                    display="flex",
+                    align_items="center",
+                    justify_content="center",
+                ),
+                rx.grid(
+                    rx.foreach(
+                        DashboardState.filtered_posts,
+                        lambda post: rx.box(
+                            rx.vstack(
                                 rx.hstack(
-                                    rx.foreach(
-                                        ["x", "reddit", "telegram", "discord", "bluesky"],
-                                        lambda plat: rx.cond(
-                                            post["status"].get(plat),
-                                            rx.box(
-                                                rx.text(
-                                                    plat.upper(),
-                                                    font_family="'DM Mono', monospace",
-                                                    font_size="0.55rem",
-                                                    font_weight="700",
-                                                    color=rx.cond(
+                                    rx.hstack(
+                                        rx.foreach(
+                                            ["x", "reddit", "telegram", "discord", "bluesky"],
+                                            lambda plat: rx.cond(
+                                                post["status"].get(plat),
+                                                rx.box(
+                                                    rx.text(
+                                                        plat.upper(),
+                                                        font_family="'DM Mono', monospace",
+                                                        font_size="0.55rem",
+                                                        font_weight="700",
+                                                        color=rx.cond(
+                                                            post["status"].get(plat, {}).get(
+                                                                "status") == "success",
+                                                            "#00FFB2",
+                                                            "rgba(255,180,0,0.85)",
+                                                        ),
+                                                    ),
+                                                    padding_x="0.6em",
+                                                    padding_y="0.2em",
+                                                    background=rx.cond(
                                                         post["status"].get(plat, {}).get(
                                                             "status") == "success",
-                                                        "#00FFB2",
-                                                        "rgba(255,180,0,0.85)",
+                                                        "rgba(0,255,178,0.05)",
+                                                        "rgba(255,180,0,0.05)",
                                                     ),
+                                                    border=rx.cond(
+                                                        post["status"].get(plat, {}).get(
+                                                            "status") == "success",
+                                                        "1px solid rgba(0,255,178,0.15)",
+                                                        "1px solid rgba(255,180,0,0.15)",
+                                                    ),
+                                                    border_radius="4px",
                                                 ),
-                                                padding_x="0.6em",
-                                                padding_y="0.2em",
-                                                background=rx.cond(
-                                                    post["status"].get(plat, {}).get(
-                                                        "status") == "success",
-                                                    "rgba(0,255,178,0.05)",
-                                                    "rgba(255,180,0,0.05)",
-                                                ),
-                                                border=rx.cond(
-                                                    post["status"].get(plat, {}).get(
-                                                        "status") == "success",
-                                                    "1px solid rgba(0,255,178,0.15)",
-                                                    "1px solid rgba(255,180,0,0.15)",
-                                                ),
-                                                border_radius="4px",
-                                            ),
-                                        )
+                                            )
+                                        ),
+                                        spacing="2",
                                     ),
-                                    spacing="2",
+                                    rx.spacer(),
+                                    rx.vstack(
+                                        rx.text(
+                                            "ID: " + post.id,
+                                            font_family="'DM Mono', monospace",
+                                            font_size="0.55rem",
+                                            color="rgba(255,255,255,0.1)",
+                                        ),
+                                        rx.text(
+                                            rx.cond(
+                                                post.scheduled_time, "Scheduled: " + post.scheduled_time, "Posted immediately"),
+                                            font_family="'DM Mono', monospace",
+                                            font_size="0.6rem",
+                                            color="rgba(255,255,255,0.3)",
+                                        ),
+                                        align="end",
+                                        spacing="0",
+                                    ),
+                                    width="100%",
+                                    align="center",
                                 ),
-                                rx.spacer(),
-                                rx.vstack(
+                                rx.box(
                                     rx.text(
-                                        "ID: " + post.id,
+                                        post["content"],
+                                        font_family="'DM Sans', sans-serif",
+                                        font_size="0.88rem",
+                                        color="rgba(255,255,255,0.7)",
+                                        line_height="1.6",
+                                    ),
+                                    width="100%",
+                                    padding_y="0.5em",
+                                ),
+                                rx.divider(border_color="rgba(255,255,255,0.03)"),
+                                rx.hstack(
+                                    rx.icon("clock", size=10,
+                                            color="rgba(255,255,255,0.2)"),
+                                    rx.text(
+                                        "Created: " +
+                                        post.get("created_at", "") + " UTC",
                                         font_family="'DM Mono', monospace",
                                         font_size="0.55rem",
-                                        color="rgba(255,255,255,0.1)",
-                                    ),
-                                    rx.text(
-                                        rx.cond(
-                                            post.scheduled_time, "Scheduled: " + post.scheduled_time, "Posted immediately"),
-                                        font_family="'DM Mono', monospace",
-                                        font_size="0.6rem",
                                         color="rgba(255,255,255,0.3)",
                                     ),
-                                    align="end",
-                                    spacing="0",
+                                    spacing="2",
+                                    align="center",
                                 ),
-                                width="100%",
-                                align="center",
+                                spacing="3",
+                                align="start",
                             ),
-                            # Middle: Content
-                            rx.box(
-                                rx.text(
-                                    post["content"],
-                                    font_family="'DM Sans', sans-serif",
-                                    font_size="0.88rem",
-                                    color="rgba(255,255,255,0.7)",
-                                    line_height="1.6",
-                                ),
-                                width="100%",
-                                padding_y="0.5em",
-                            ),
-                            # Bottom: Metadata
-                            rx.divider(border_color="rgba(255,255,255,0.03)"),
-                            rx.hstack(
-                                rx.icon("clock", size=10,
-                                        color="rgba(255,255,255,0.2)"),
-                                rx.text(
-                                    "Created: " +
-                                    post.get("created_at", "") + " UTC",
-                                    font_family="'DM Mono', monospace",
-                                    font_size="0.55rem",
-                                    color="rgba(255,255,255,0.3)",
-                                ),
-                                spacing="2",
-                                align="center",
-                            ),
-                            spacing="3",
-                            align="start",
+                            padding="1.5em",
+                            background="rgba(255,255,255,0.01)",
+                            border="1px solid rgba(255,255,255,0.04)",
+                            border_radius="12px",
+                            width="100%",
+                            _hover={
+                                "border_color": "rgba(255,255,255,0.08)", "background": "rgba(255,255,255,0.015)"},
+                            transition="all 0.2s ease",
                         ),
-                        padding="1.5em",
-                        background="rgba(255,255,255,0.01)",
-                        border="1px solid rgba(255,255,255,0.04)",
-                        border_radius="12px",
-                        width="100%",
-                        _hover={
-                            "border_color": "rgba(255,255,255,0.08)", "background": "rgba(255,255,255,0.015)"},
-                        transition="all 0.2s ease",
                     ),
+                    spacing="4",
+                    columns="2",
+                    width="100%",
                 ),
-                spacing="4",
-                columns="2",
-                width="100%",
             ),
         ),
         spacing="5",

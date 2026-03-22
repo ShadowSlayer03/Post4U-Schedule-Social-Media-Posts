@@ -59,6 +59,10 @@ class DashboardState(rx.State):
     edit_post_scheduled_time: str | None = None
     edit_post_media_files: list[str] = []
 
+    # History tab filters
+    history_filter_platform: str = ""   # "" = all platforms
+    history_filter_status: str = ""     # "" = all, "success", "error"
+
     # Constant but can be changed acc to platform capabilities
     limits = {"x": 280, "reddit": 40000, "telegram": 4096, "discord": 2000, "bluesky": 300}
 
@@ -70,7 +74,7 @@ class DashboardState(rx.State):
         return [
             f"{p.id} | {p.content[:40]}"
             for p in self.posts
-                if p.status == {} and p.scheduled_time and p.scheduled_time > datetime.now(pytz.utc).isoformat()
+                if p.status == {} and p.scheduled_time!=None and p.scheduled_time > datetime.now(pytz.utc).isoformat()
         ]
     
     @rx.var
@@ -98,9 +102,51 @@ class DashboardState(rx.State):
                     editable_posts.append(p)
         return editable_posts
 
+    @rx.var
+    def filtered_posts(self) -> list[PostRecord]:
+        result = []
+        for p in self.posts:
+            if self.history_filter_platform:
+                if self.history_filter_platform not in p.platforms:
+                    continue
+                if self.history_filter_status:
+                    plat_status = p.status.get(self.history_filter_platform)
+                    if plat_status is None:
+                        continue
+                    if plat_status.status != self.history_filter_status:
+                        continue
+            elif self.history_filter_status:
+                matched = any(
+                    ps.status == self.history_filter_status
+                    for ps in p.status.values()
+                )
+                if not matched:
+                    continue
+            result.append(p)
+        return result
+
     @rx.event
     def set_tab(self, tab: str):
         self.active_tab = tab
+
+    @rx.event
+    def set_history_filter_platform(self, platform: str):
+        if self.history_filter_platform == platform:
+            self.history_filter_platform = ""
+        else:
+            self.history_filter_platform = platform
+
+    @rx.event
+    def set_history_filter_status(self, status: str):
+        if self.history_filter_status == status:
+            self.history_filter_status = ""
+        else:
+            self.history_filter_status = status
+
+    @rx.event
+    def clear_history_filters(self):
+        self.history_filter_platform = ""
+        self.history_filter_status = ""
 
     @rx.event
     def set_media_files(self, media_files: list[tuple[str, bytes, str]]):
