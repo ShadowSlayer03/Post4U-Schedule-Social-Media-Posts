@@ -104,7 +104,6 @@ def schedule_tab() -> rx.Component:
                     on_drop=DashboardState.handle_upload(
                         rx.upload_files(upload_id="media_upload")),
                 ),
-                # File list — rendered below the upload box once files are selected
                 rx.cond(
                     DashboardState.media_files.length() > 0,
                     rx.vstack(
@@ -173,7 +172,7 @@ def schedule_tab() -> rx.Component:
             post_btn("Schedule Post →"),
             spacing="5",
             align="start",
-            width="55%",
+            width=rx.breakpoints(initial="100%", md="55%"),
         ),
         rx.box(
             platform_previews_panel(),
@@ -183,8 +182,9 @@ def schedule_tab() -> rx.Component:
             position="sticky",
             top="1.5em",
             align_self="start",
+            display=rx.breakpoints(initial="none", md="block"),
         ),
-        width="100%",
+        width=rx.breakpoints(initial="100%", sm="150%"),
         align="start",
         gap="4em"
     )
@@ -333,7 +333,7 @@ def post_now_tab() -> rx.Component:
             post_btn("Post Now →"),
             spacing="5",
             align="start",
-            width="55%",
+            width=rx.breakpoints(initial="100%", md="55%"),
         ),
         rx.box(
             platform_previews_panel(),
@@ -343,6 +343,7 @@ def post_now_tab() -> rx.Component:
             position="sticky",
             top="1.5em",
             align_self="start",
+            display=rx.breakpoints(initial="none", md="block"),
         ),
         width="100%",
         align="start",
@@ -626,7 +627,7 @@ def history_tab() -> rx.Component:
                         ),
                     ),
                     spacing="4",
-                    columns="2",
+                    columns=rx.breakpoints(initial="1", md="2"),
                     width="100%",
                 ),
             ),
@@ -714,7 +715,7 @@ def unschedule_tab() -> rx.Component:
         unschedule_btn("Unschedule →"),
         spacing="5",
         align="start",
-        width="55%",
+        width=rx.breakpoints(initial="100%", md="55%"),
         on_mount=DashboardState.load_posts,
     )
 
@@ -909,7 +910,7 @@ def edit_tab() -> rx.Component:
             rx.grid(
                 rx.foreach(DashboardState.posts_that_can_be_edited, _post_tile_for_edit),
                 spacing="4",
-                columns="2",
+                columns=rx.breakpoints(initial="1", md="2"),
                 width="100%",
             ),
         ),
@@ -1086,7 +1087,7 @@ def edit_tab() -> rx.Component:
             post_btn("Edit Post →"),
             spacing="5",
             align="start",
-            width="55%",
+            width=rx.breakpoints(initial="100%", md="55%"),
         ),
         rx.box(
             platform_previews_panel(),
@@ -1096,6 +1097,7 @@ def edit_tab() -> rx.Component:
             position="sticky",
             top="1.5em",
             align_self="start",
+            display=rx.breakpoints(initial="none", md="block"),
         ),
         width="100%",
         align="start",
