@@ -184,7 +184,7 @@ def schedule_tab() -> rx.Component:
             align_self="start",
             display=rx.breakpoints(initial="none", md="block"),
         ),
-        width=rx.breakpoints(initial="100%", sm="150%"),
+        width="100%",
         align="start",
         gap="4em"
     )
