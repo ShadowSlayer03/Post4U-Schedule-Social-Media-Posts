@@ -26,7 +26,7 @@ def _avatar(label: str, bg: str, size: str = "34px", icon: str | None = None) ->
 def _content_text(color: str = "white") -> rx.Component:
     """Reactive content body — same across all platforms."""
     return rx.text(
-        DashboardState.content,
+        DashboardState.preview_content,
         font_family=SANS, font_size="0.88rem", color=color,
         white_space="pre-wrap", line_height="1.55", width="100%",
     )
@@ -307,16 +307,16 @@ def bluesky_preview_card() -> rx.Component:
 def platform_previews_panel() -> rx.Component:
     """Shows a card for every selected platform. Empty box when none selected."""
     return rx.cond(
-        DashboardState.platforms.length() > 0,
+        DashboardState.preview_platforms.length() > 0,
         rx.vstack(
             rx.text("Preview", font_family=MONO, font_size="0.67rem",
                     color="rgba(0,255,178,0.5)", letter_spacing="0.14em",
                     text_transform="uppercase", margin_bottom="0.2em"),
-            rx.cond(DashboardState.platforms.contains("x"), x_preview_card()),
-            rx.cond(DashboardState.platforms.contains("reddit"), reddit_preview_card()),
-            rx.cond(DashboardState.platforms.contains("telegram"), telegram_preview_card()),
-            rx.cond(DashboardState.platforms.contains("discord"), discord_preview_card()),
-            rx.cond(DashboardState.platforms.contains("bluesky"), bluesky_preview_card()),
+            rx.cond(DashboardState.preview_platforms.contains("x"), x_preview_card()),
+            rx.cond(DashboardState.preview_platforms.contains("reddit"), reddit_preview_card()),
+            rx.cond(DashboardState.preview_platforms.contains("telegram"), telegram_preview_card()),
+            rx.cond(DashboardState.preview_platforms.contains("discord"), discord_preview_card()),
+            rx.cond(DashboardState.preview_platforms.contains("bluesky"), bluesky_preview_card()),
             spacing="6", align="start", width="100%",
         ),
         rx.box(),

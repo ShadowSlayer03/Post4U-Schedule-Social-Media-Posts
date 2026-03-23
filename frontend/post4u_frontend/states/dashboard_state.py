@@ -57,7 +57,6 @@ class DashboardState(rx.State):
     edit_post_content: str = ""
     edit_post_platforms: list[str] = []
     edit_post_scheduled_time: str | None = None
-    edit_post_media_files: list[str] = []
 
     # History tab filters
     history_filter_platform: str = ""   # "" = all platforms
@@ -67,6 +66,18 @@ class DashboardState(rx.State):
     limits = {"x": 280, "reddit": 40000, "telegram": 4096, "discord": 2000, "bluesky": 300}
 
     _MAX_RESPONSE_BYTES = 512_000
+
+    @rx.var
+    def preview_content(self) -> str:
+        if self.active_tab == "edit_post":
+            return self.edit_post_content
+        return self.content
+
+    @rx.var
+    def preview_platforms(self) -> list[str]:
+        if self.active_tab == "edit_post":
+            return self.edit_post_platforms
+        return self.platforms
 
     @rx.var
     def post_select_options(self) -> list[str]:
@@ -287,7 +298,6 @@ class DashboardState(rx.State):
                 self.edit_post_content = post.content
                 self.edit_post_platforms = list(post.platforms)
                 self.edit_post_scheduled_time = post.scheduled_time
-                self.edit_post_media_files = post.media_paths if hasattr(post, "media_paths") else []
         return
 
     @rx.event
@@ -296,15 +306,10 @@ class DashboardState(rx.State):
         self.edit_post_content = ""
         self.edit_post_platforms = []
         self.edit_post_scheduled_time = None
-        self.edit_post_media_files = []
 
     @rx.event
     def set_edit_content(self, val: str):
         self.edit_post_content = val
-
-    @rx.event
-    def set_edit_post_media_files(self, val: list[str]):
-        self.edit_post_media_files = val
 
     @rx.event
     def toggle_edit_platform(self, platform: str):
