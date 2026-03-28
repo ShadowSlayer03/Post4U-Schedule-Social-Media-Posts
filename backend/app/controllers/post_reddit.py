@@ -46,5 +46,7 @@ def post_to_reddit(content: str, subreddit: str, media_paths: list[str] = None):
         return {"status": "success", "platform_post_id": submission.id}
 
     except Exception as e:
-        logger.error(f"Reddit error: {e}")
-        return {"status": "error", "message": str(e)}
+        status_code = getattr(getattr(e, "response", None), "status_code", None)
+        msg = f"[HTTP {status_code}] {e}" if status_code else str(e)
+        logger.error(f"Reddit error: {msg}")
+        return {"status": "error", "message": msg}
