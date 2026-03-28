@@ -63,7 +63,7 @@ async def publish_with_retry(post_id: str, attempt: int = 1, retry_platforms: li
 
     for platform in platforms_to_post:
         try:
-            result = await publish_to_platform(platform, post.content)
+            result = await publish_to_platform(platform, post.content, post.media_paths)
             results[platform] = result
             if result.get("status") == "error":
                 failed_platforms.append(platform)

@@ -63,7 +63,7 @@ class DashboardState(rx.State):
     history_filter_status: str = ""     # "" = all, "success", "error"
 
     # Constant but can be changed acc to platform capabilities
-    limits = {"x": 280, "reddit": 40000, "telegram": 4096, "discord": 2000, "bluesky": 300}
+    limits = {"x": 500, "reddit": 40000, "telegram": 4096, "discord": 2000, "bluesky": 300}
 
     _MAX_RESPONSE_BYTES = 512_000
 
@@ -449,17 +449,36 @@ class DashboardState(rx.State):
                     timeout=10
                 )
                 if r.status_code == 200:
+                    body = r.json()
+                    results = body.get("results", {})
+
+                    any_error = False
+                    for plat, plat_result in results.items():
+                        if isinstance(plat_result, dict) and plat_result.get("status") == "error":
+                            any_error = True
+                            msg = plat_result.get("message", "Unknown error")
+                            yield rx.toast.error(f"{plat.capitalize()}: {msg}", duration=7000)
+
                     if is_edit:
-                        yield rx.toast.success("Post updated successfully!", duration=5000)
+                        if not any_error:
+                            yield rx.toast.success("Post updated successfully!", duration=5000)
                         self.clear_edit_selection()
                         self.media_files = []
                         yield DashboardState.load_posts
                     elif self.active_tab == "schedule":
-                        yield rx.toast.success("Scheduled successfully!", duration=5000)
+                        if not any_error:
+                            yield rx.toast.success("Scheduled successfully!", duration=5000)
                         self.clear_form()
                     else:
-                        yield rx.toast.success("Posted successfully!", duration=5000)
-                        self.clear_form()
+                        if not any_error:
+                            yield rx.toast.success("Posted successfully!", duration=5000)
+                        elif results and all(
+                            isinstance(v, dict) and v.get("status") == "error"
+                            for v in results.values()
+                        ):
+                            pass
+                        else:
+                            self.clear_form()
                 else:
                     yield rx.toast.error(f"Error: {r.text}", duration=5000)
 
@@ -486,7 +505,9 @@ class DashboardState(rx.State):
                     self.posts = [PostRecord(**p)
                                   for p in raw_posts]
                     yield rx.toast.success(f"Successfully loaded {len(self.posts)} posts.", duration=5000)
-        # Handle this better
+                else:
+                    yield rx.toast.error(f"Failed to load posts (HTTP {r.status_code})", duration=5000)
+
         except Exception as e:
             yield rx.toast.error(f"Could not load posts: {str(e)}", duration=5000)
         finally:
