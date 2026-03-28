@@ -452,7 +452,6 @@ class DashboardState(rx.State):
                     body = r.json()
                     results = body.get("results", {})
 
-                    # Fire a per-platform toast for every failure
                     any_error = False
                     for plat, plat_result in results.items():
                         if isinstance(plat_result, dict) and plat_result.get("status") == "error":
@@ -477,9 +476,9 @@ class DashboardState(rx.State):
                             isinstance(v, dict) and v.get("status") == "error"
                             for v in results.values()
                         ):
-                            pass  # all failed — toasts already shown above, don't clear form
+                            pass
                         else:
-                            self.clear_form()  # partial success — clear anyway
+                            self.clear_form()
                 else:
                     yield rx.toast.error(f"Error: {r.text}", duration=5000)
 
@@ -506,7 +505,9 @@ class DashboardState(rx.State):
                     self.posts = [PostRecord(**p)
                                   for p in raw_posts]
                     yield rx.toast.success(f"Successfully loaded {len(self.posts)} posts.", duration=5000)
-        # Handle this better
+                else:
+                    yield rx.toast.error(f"Failed to load posts (HTTP {r.status_code})", duration=5000)
+
         except Exception as e:
             yield rx.toast.error(f"Could not load posts: {str(e)}", duration=5000)
         finally:
