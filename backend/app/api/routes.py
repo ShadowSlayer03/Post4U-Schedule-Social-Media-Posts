@@ -11,7 +11,7 @@ from app.api.utils.check_files import check_files
 
 router = APIRouter()
 
-MAX_UPLOAD_SIZE = 10 * 1024 * 1024  
+MAX_UPLOAD_SIZE = 20 * 1024 * 1024  
 MAX_FILES = 4                        
 ALLOWED_MIME_TYPES = {"image/jpeg", "image/png", "image/gif", "video/mp4", "video/quicktime", "video/x-msvideo"}
 ALLOWED_PLATFORMS = {"x", "reddit", "telegram", "discord", "bluesky"}
